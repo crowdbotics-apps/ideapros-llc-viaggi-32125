@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@modules/camera": "file:./modules/camera",
+    "@modules/maps": "file:./modules/maps/",
     "@modules/privacy-policy": "file:./modules/privacy-policy",
     "@modules/social-login": "file:./modules/social-login/",
     "@modules/splash": "file:./modules/splash/",
@@ -29,6 +30,7 @@
     "react-native-elements": "^3.3.1",
     "react-native-gesture-handler": "^1.10.3",
     "react-native-image-crop-picker": "0.36.2",
+    "react-native-maps": "0.27.1",
     "react-native-permissions": "3.0.4",
     "react-native-reanimated": "^2.0.0",
     "react-native-responsive-screen": "^1.4.2",

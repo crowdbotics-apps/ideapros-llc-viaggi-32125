@@ -957,6 +957,9 @@
   dependencies:
     react-native-actionsheet "^2.4.2"
 
+"@modules/maps@file:./modules/maps/":
+  version "1.0.0"
+
 "@modules/privacy-policy@file:./modules/privacy-policy":
   version "1.0.1"
   dependencies:
@@ -974,7 +977,7 @@
     react-native-keyboard-aware-scroll-view "^0.9.3"
     uuid "^8.3.2"
 
-"@modules/splash@file:./modules/splash/":
+"@modules/splash@file:./modules/splash":
   version "1.0.0"
 
 "@modules/terms-and-conditions@file:./modules/terms-and-conditions":
@@ -5665,6 +5668,11 @@ react-native-keyboard-aware-scroll-view@^0.9.3:
   dependencies:
     prop-types "^15.6.2"
     react-native-iphone-x-helper "^1.0.3"
+
+react-native-maps@0.27.1:
+  version "0.27.1"
+  resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-0.27.1.tgz#2f10cd417bb2fd938c9e015b1c9b6d9b1a44b97f"
+  integrity sha512-HygBkZBecTnIVRYrSiLRAvu4OmXOYso/A7c6Cy73HkOh9CgGV8Ap5eBea24tvmFGptjj5Hg8AJ94/YbmWK1Okw==
 
 react-native-permissions@3.0.4:
   version "3.0.4"
