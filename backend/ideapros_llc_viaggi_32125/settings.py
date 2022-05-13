@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 LOCAL_APPS = [
     'home',
     'users.apps.UsersConfig',
+    'myplaces'
 ]
 THIRD_PARTY_APPS = [
     'rest_framework',
@@ -257,3 +258,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 AWS_QUERYSTRING_AUTH = False
+
+PLACES_API_KEY = env.str("PLACES_API", "")

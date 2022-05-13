@@ -11,3 +11,14 @@ INTEREST_TYPES = (
     ('Other POIs', 'Other POIs'),
     ('All', 'All')
 )
+
+EXPERIENCE_TYPES = (
+    ('Thumbs up', 'Thumbs up'),
+    ('Neutral', 'Neutral'),
+    ('Thumbs down', 'Thumbs down')
+)
+
+BUCKETLIST_TYPES = (
+    ('To Explore', 'To Explore'),
+    ('Wanna Visit', 'Wanna Visit')
+)
