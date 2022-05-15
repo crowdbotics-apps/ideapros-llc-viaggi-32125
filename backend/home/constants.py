@@ -22,3 +22,8 @@ BUCKETLIST_TYPES = (
     ('To Explore', 'To Explore'),
     ('Wanna Visit', 'Wanna Visit')
 )
+
+STATUS_TYPES = (
+    ('Bucket List', 'Bucket List'),
+    ('Visited', 'Visited')
+)

@@ -1,6 +1,10 @@
 from django.core.mail import EmailMessage
 from rest_framework.authtoken.models import Token
+
+from ideapros_llc_viaggi_32125.settings import PLACES_API_KEY
+
 import pyotp
+import requests
 
 
 def generateOTP(email=None, user=None):
@@ -55,3 +59,39 @@ def send_otp(user):
 def auth_token(user):
     token, created = Token.objects.get_or_create(user=user)
     return token
+
+def get_photo(result):
+    try:
+        reference = result["photos"][0]["photo_reference"]
+        width = result["photos"][0]["width"]
+    except KeyError:
+        photo_response=None
+    else:
+        url = "https://maps.googleapis.com/maps/api/place/photo?maxwidth={}&photo_reference={}&key={}" \
+            .format(width, reference, PLACES_API_KEY)
+        retrieved_image_header = requests.head(url)
+        try:
+            photo_response = retrieved_image_header.headers['location']
+        except Exception as e:
+            photo_response = None
+    return photo_response
+
+
+def get_photos(result):
+    photos = result["photos"]
+    photo_response = []
+    for photo in photos:
+        try:
+            reference = photo["photo_reference"]
+            width = photo["width"]
+        except KeyError:
+            pass
+        else:
+            url = "https://maps.googleapis.com/maps/api/place/photo?maxwidth={}&photo_reference={}&key={}" \
+                .format(width, reference, PLACES_API_KEY)
+            retrieved_image_header = requests.head(url)
+            try:
+                photo_response.append(retrieved_image_header.headers['location'])
+            except Exception as e:
+                pass
+    return photo_response

@@ -95,6 +95,36 @@ class UserViewSet(ModelViewSet):
             return Response({'detail': 'Authentication Token Missing or Invalid'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(status=status.HTTP_200_OK)
 
+    # Follow a FF
+    @action(detail=False, methods=['post'])
+    def follow(self, request):
+        user_id = request.data.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'Invalid User ID'}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.following.add(user)
+        serializer = UserSerializer(request.user.following.all(), many=True)
+        return Response(serializer.data)
+
+    # Unfollow a FF
+    @action(detail=False, methods=['post'])
+    def unfollow(self, request):
+        user_id = request.data.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'detail': 'Invalid User ID'}, status=status.HTTP_400_BAD_REQUEST)
+        request.user.following.remove(user)
+        serializer = UserSerializer(request.user.following.all(), many=True)
+        return Response(serializer.data)
+
+    # Following List
+    @action(detail=False, methods=['get'])
+    def following(self, request):
+        serializer = UserSerializer(request.user.following.all(), many=True)
+        return Response(serializer.data)
+
     # Admin a User
     @action(detail=False, methods=['post'])
     def admin(self, request):

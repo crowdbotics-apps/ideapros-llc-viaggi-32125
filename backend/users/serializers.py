@@ -7,6 +7,9 @@ from users.models import Profile, User
 from home.utility import verifyOTP
 
 
+
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     """
     A data representation of the User model's Profile

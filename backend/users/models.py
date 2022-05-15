@@ -21,8 +21,8 @@ class User(AbstractUser):
     activation_key = models.CharField(max_length=255, blank=True, null=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     location = PointField(blank=True, null=True)
+    following = models.ManyToManyField("self", blank=True, symmetrical=False)
 
- 
     def get_absolute_url(self):
         return reverse("users:detail", kwargs={"username": self.username})
 

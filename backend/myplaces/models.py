@@ -19,30 +19,99 @@ class Place(UUIDModel):
         max_length=255
     )
     name = models.CharField(
-        max_length=255
+        max_length=255,
+        null=True,
+        blank=True
     )
     location = PointField()
-    opening_hours = JSONField()
+    opening_hours = JSONField(
+        blank=True,
+        null=True
+    )
     price_level = models.DecimalField(
         max_digits=2,
-        decimal_places=1
+        decimal_places=1,
+        blank=True,
+        null=True
     )
     types = ArrayField(
         models.CharField(
             max_length=255,
-            blank=True
+            blank=True,
+            null=True
         ),
         blank=True,
+        null=True,
         default=list
     )
     rating = models.DecimalField(
         max_digits=2,
-        decimal_places=1
+        decimal_places=1,
+        blank=True,
+        null=True
     )
-    user_ratings_total = models.PositiveIntegerField()
+    user_ratings_total = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
     vicinity = models.CharField(
-        max_length=255
+        max_length=255,
+        null=True,
+        blank=True
     )
+    country = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    state = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    city = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    postal_code = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    street_number = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    street_name = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    users_in_bucketlist = models.ManyToManyField(
+        User,
+        through='Bucketlist',
+        related_name='bucketlist_places'
+    )
+    users_have_visited = models.ManyToManyField(
+        User,
+        through='Visited',
+        related_name='visited_places'
+    )
+
+
+class Photo(UUIDModel):
+    """
+    A data representation of the Place Photos from the
+    Google Places API
+    """
+    place = models.ForeignKey(
+        Place, 
+        on_delete=models.CASCADE,
+        related_name='photos'
+    )
+    photo = models.URLField()
 
 
 class BucketList(UUIDModel):
@@ -89,7 +158,10 @@ class Visited(UUIDModel):
         blank=True,
         null=True
     )
-    visited_on = models.DateField()
+    visited_on = models.DateField(
+        blank=True,
+        null=True
+    )
     description = models.TextField(
         blank=True
     )
