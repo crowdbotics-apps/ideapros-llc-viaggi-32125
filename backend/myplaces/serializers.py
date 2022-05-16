@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from rest_framework import serializers
 
 from home.constants import BUCKETLIST_TYPES, EXPERIENCE_TYPES, STATUS_TYPES
@@ -31,26 +32,29 @@ class PlaceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
+        request_user =  self.context['request'].user
         rep = super().to_representation(instance)
         users_have_visited = rep.pop('users_have_visited', None)
         visited_users = []
         if users_have_visited is not None:
             for user in users_have_visited:
-                visited = Visited.objects.get(
-                    user__id=user,
-                    place=instance
-                )
-                visited_users.append(NestedVisitedSerializer(visited).data)
+                if user in request_user.following.values_list('id', flat=True):
+                    visited = Visited.objects.get(
+                        user__id=user,
+                        place=instance
+                    )
+                    visited_users.append(NestedVisitedSerializer(visited).data)
         rep['users_have_visited'] = visited_users
         users_in_bucketlist = rep.pop('users_in_bucketlist', None)
         bucketlist_users = []
         if users_in_bucketlist is not None:
             for user in users_in_bucketlist:
-                bucketlist = BucketList.objects.get(
-                    user__id=user,
-                    place=instance
-                )
-                bucketlist_users.append(NestedBucketlistSerializer(bucketlist).data)
+                if user in request_user.following.values_list('id', flat=True):
+                    bucketlist = BucketList.objects.get(
+                        user__id=user,
+                        place=instance
+                    )
+                    bucketlist_users.append(NestedBucketlistSerializer(bucketlist).data)
         rep['users_in_bucketlist'] = bucketlist_users
         return rep
                 

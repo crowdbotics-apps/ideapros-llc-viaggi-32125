@@ -75,15 +75,20 @@ class PlacesViewSet(ModelViewSet):
         for result in results:
             photo = get_photo(result)
             place = {
-                "place_id": result.get('place_id'),
-                "name": result.get('name'),
+                "place_id": result.get('place_id', None),
+                "name": result.get('name', None),
                 "location": result.get('geometry', {}).get('location'),
-                "opening_hours": result.get('opening_hours'),
-                "price_level": result.get('price_level'),
-                "types": result.get('types'),
-                "rating": result.get('rating'),
-                "user_ratings_total": result.get('user_ratings_total'),
-                "vicinity": result.get('vicinity'),
+                "opening_hours": result.get('opening_hours', None),
+                "price_level": result.get('price_level', None),
+                "types": result.get('types', None),
+                "rating": result.get('rating', None),
+                "user_ratings_total": result.get('user_ratings_total', None),
+                "vicinity": result.get('vicinity', None),
+                'formatted_phone_number': result.get('formatted_phone_number', None),
+                'international_phone_number': result.get('international_phone_number', None),
+                'formatted_address': result.get('formatted_address', None),
+                'url': result.get('url', None),
+                'website': result.get('website', None),
                 "photo": photo
             }
             places.append(place)
@@ -106,24 +111,88 @@ class PlacesViewSet(ModelViewSet):
         for result in results:
             photo = get_photo(result)
             place = {
-                "place_id": result.get('place_id'),
-                "name": result.get('name'),
+                "place_id": result.get('place_id', None),
+                "name": result.get('name', None),
                 "location": result.get('geometry', {}).get('location'),
-                "opening_hours": result.get('opening_hours'),
-                "price_level": result.get('price_level'),
-                "types": result.get('types'),
-                "rating": result.get('rating'),
-                "user_ratings_total": result.get('user_ratings_total'),
-                "vicinity": result.get('vicinity'),
+                "opening_hours": result.get('opening_hours', None),
+                "price_level": result.get('price_level', None),
+                "types": result.get('types', None),
+                "rating": result.get('rating', None),
+                "user_ratings_total": result.get('user_ratings_total', None),
+                "vicinity": result.get('vicinity', None),
+                'formatted_phone_number': result.get('formatted_phone_number', None),
+                'international_phone_number': result.get('international_phone_number', None),
+                'formatted_address': result.get('formatted_address', None),
+                'url': result.get('url', None),
+                'website': result.get('website', None),
                 "photo": photo
             }
             places.append(place)
         return Response({'places': places}, status=rf_status.HTTP_200_OK)
 
+    @action(detail=False, methods=['post'])
+    def place_details(self, request):
+        place_id = request.data.get('place_id')
+        response = gmaps.place(
+            place_id
+        )
+        results = response.get('result')
+        photos = get_photos(results)
+        location = results.get('geometry', {}).get('location')
+        location = Point(location['lat'], location['lng'])
+        address_components = results.get('address_components')
+        country = None
+        state = None
+        city = None
+        street_number = None
+        street_name = None
+        postal_code = None
+        for address in address_components:
+            types = address.get('types')
+            if 'country' in types:
+                country = address.get('long_name')
+            elif 'administrative_area_level_1' in types:
+                state = address.get('long_name')
+            elif 'administrative_area_level_2' in types:
+                city = address.get('long_name')
+            elif 'route' in types:
+                street_name = address.get('long_name')
+            elif 'street_number' in types:
+                street_number = address.get('long_name')
+            elif 'postal_code' in types:
+                postal_code = address.get('long_name')
+
+        return Response(
+            {
+                'place_id': place_id,
+                'name': results.get('name', None),
+                'location': location.coords,
+                'opening_hours': results.get('opening_hours', None),
+                'price_level': results.get('price_level', None),
+                'types': results.get('types', None),
+                'rating': results.get('rating', None),
+                'user_ratings_total': results.get('user_ratings_total', None),
+                'vicinity': results.get('vicinity', None),
+                'country': country,
+                'state': state,
+                'city': city,
+                'street_name': street_name,
+                'street_number': street_number,
+                'postal_code': postal_code,
+                'formatted_phone_number': results.get('formatted_phone_number', None),
+                'international_phone_number': results.get('international_phone_number', None),
+                'formatted_address': results.get('formatted_address', None),
+                'url': results.get('url', None),
+                'website': results.get('website', None),
+                'photos': photos
+            }
+        )
+
+
     # Get Textual Search Results
     @action(detail=False, methods=['post'])
     def add_place(self, request):
-        serializer = NewPlaceSerializer(data=request.data)
+        serializer = NewPlaceSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             place_id = serializer.validated_data['place_id']
             try:
@@ -180,7 +249,12 @@ class PlacesViewSet(ModelViewSet):
                     city=city,
                     street_name=street_name,
                     street_number=street_number,
-                    postal_code=postal_code
+                    postal_code=postal_code,
+                    formatted_phone_number=results.get('formatted_phone_number', None),
+                    international_phone_number=results.get('international_phone_number', None),
+                    formatted_address=results.get('formatted_address', None),
+                    url=results.get('url', None),
+                    website=results.get('website', None),
                 )
                 for photo in photos:
                     Photo.objects.create(
@@ -197,7 +271,8 @@ class PlacesViewSet(ModelViewSet):
                 )
                 serializer = BucketListSerializer(
                     request.user.bucketlist.all(),
-                    many=True
+                    many=True,
+                    context={'request': request}
                 )
                 return Response(serializer.data)
             elif serializer.validated_data['category'] == "Visited":
@@ -217,12 +292,8 @@ class PlacesViewSet(ModelViewSet):
                 )
                 serializer = VisitedSerializer(
                     request.user.visited.all(),
-                    many=True
+                    many=True,
+                    context={'request': request}
                 )
                 return Response(serializer.data)
         return Response(serializer.errors, status=rf_status.HTTP_400_BAD_REQUEST)
-
-
-# CHECK RESULTS DATA TO SEE WHY NULL - MAYBE INCORRECT results.get
-# CHECK IF PLACE ID EXISTS - IF NOT, CREATE NEW PLACE AND FETCH ALL IMAGES
-# CHEcK OPTIONAL FIELDS DONT RETURN KEY ERROR on validated_data[""] for visited/bucketlist

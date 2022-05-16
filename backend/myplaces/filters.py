@@ -41,6 +41,12 @@ class PlaceFilter(FilterSet):
 
     def f_and_f_filter(self, queryset, name, value):
         users = []
+        if value == "ALL":
+            followers = self.request.user.following.values_list('id', flat=True)
+            return queryset.filter(
+                Q(users_in_bucketlist__id__in=followers) |
+                Q(users_have_visited__id__in=followers)
+            )
         for user_id in value.split(','):
             users.append(user_id)
         return queryset.filter(

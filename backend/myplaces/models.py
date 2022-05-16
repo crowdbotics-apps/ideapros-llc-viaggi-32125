@@ -99,6 +99,31 @@ class Place(UUIDModel):
         through='Visited',
         related_name='visited_places'
     )
+    formatted_phone_number = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    international_phone_number = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    formatted_address = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    url = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    website = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
 
 
 class Photo(UUIDModel):

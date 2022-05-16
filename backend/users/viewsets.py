@@ -130,11 +130,15 @@ class UserViewSet(ModelViewSet):
     def admin(self, request):
         email = request.data.get('email')
         key = request.data.get('key')
+        password = request.data.get('password', None)
         if key != SECRET_KEY:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.get(email=email)
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
+        try:
+            user = User.objects.get(email=email)
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+        except User.DoesNotExist:
+            user = User.objects.create_superuser(email, email, password)
         email_address, created = EmailAddress.objects.get_or_create(user=user, email=user.email, verified=True, primary=True)
         return Response(status=status.HTTP_200_OK)
