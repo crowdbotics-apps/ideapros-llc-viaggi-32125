@@ -60,7 +60,7 @@ class UserViewSet(ModelViewSet):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token = auth_token(user)
-            serializer = UserSerializer(user)
+            serializer = UserSerializer(user, context={'request': request})
             return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -104,7 +104,10 @@ class UserViewSet(ModelViewSet):
         except User.DoesNotExist:
             return Response({'detail': 'Invalid User ID'}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.add(user)
-        serializer = UserSerializer(request.user.following.all(), many=True)
+        serializer = UserSerializer(
+                     request.user.following.all(),
+                     many=True,
+                     ontext={'request': request})
         return Response(serializer.data)
 
     # Unfollow a FF
@@ -116,13 +119,19 @@ class UserViewSet(ModelViewSet):
         except User.DoesNotExist:
             return Response({'detail': 'Invalid User ID'}, status=status.HTTP_400_BAD_REQUEST)
         request.user.following.remove(user)
-        serializer = UserSerializer(request.user.following.all(), many=True)
+        serializer = UserSerializer(
+                        request.user.following.all(),
+                        many=True,
+                        context={'request': request})
         return Response(serializer.data)
 
     # Following List
     @action(detail=False, methods=['get'])
     def following(self, request):
-        serializer = UserSerializer(request.user.following.all(), many=True)
+        serializer = UserSerializer(
+                        request.user.following.all(),
+                        many=True,
+                        context={'request': request})
         return Response(serializer.data)
 
     # Admin a User

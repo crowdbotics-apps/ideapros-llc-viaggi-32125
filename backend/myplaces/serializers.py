@@ -38,23 +38,24 @@ class PlaceSerializer(serializers.ModelSerializer):
         visited_users = []
         if users_have_visited is not None:
             for user in users_have_visited:
-                if user in request_user.following.values_list('id', flat=True):
-                    visited = Visited.objects.get(
-                        user__id=user,
-                        place=instance
-                    )
-                    visited_users.append(NestedVisitedSerializer(visited).data)
+                # Removed as they should be able to see everyone's tags?
+                # if user in request_user.following.values_list('id', flat=True):
+                visited = Visited.objects.get(
+                    user__id=user,
+                    place=instance
+                )
+                visited_users.append(NestedVisitedSerializer(visited).data)
         rep['users_have_visited'] = visited_users
         users_in_bucketlist = rep.pop('users_in_bucketlist', None)
         bucketlist_users = []
         if users_in_bucketlist is not None:
             for user in users_in_bucketlist:
-                if user in request_user.following.values_list('id', flat=True):
-                    bucketlist = BucketList.objects.get(
-                        user__id=user,
-                        place=instance
-                    )
-                    bucketlist_users.append(NestedBucketlistSerializer(bucketlist).data)
+                # if user in request_user.following.values_list('id', flat=True):
+                bucketlist = BucketList.objects.get(
+                    user__id=user,
+                    place=instance
+                )
+                bucketlist_users.append(NestedBucketlistSerializer(bucketlist).data)
         rep['users_in_bucketlist'] = bucketlist_users
         return rep
                 

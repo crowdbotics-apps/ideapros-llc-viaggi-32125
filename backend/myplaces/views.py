@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
+from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
 
@@ -39,7 +40,7 @@ class FollowerViewSet(ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def myself(self, request):
-        serializer = FollowerSerializer(request.user)
+        serializer = FollowerSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
 
@@ -53,11 +54,20 @@ class PlacesViewSet(ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        lat = self.request.query_params.get('latitude')
-        lng = self.request.query_params.get('longitude')
-        location = Point(float(lat), float(lng))
-        qs = qs.filter(location__dwithin=(location, 1))
-        return qs.distinct()
+        lat = self.request.query_params.get('latitude', None)
+        lng = self.request.query_params.get('longitude', None)
+        if lat is not None and lng is not None:
+            location = Point(float(lat), float(lng))
+            sort_distance = self.request.query_params.get('distance', None)
+            qs = qs.filter(location__dwithin=(location, 1))
+            if sort_distance == "low":
+                qs = qs.annotate(distance=Distance('location', location)) \
+                    .order_by('distance')
+            elif sort_distance == "high":
+                qs = qs.annotate(distance=Distance('location', location)) \
+                    .order_by('-distance')
+            return qs.distinct()
+        return qs
 
     # Get Nearby Places
     @action(detail=False, methods=['post'])

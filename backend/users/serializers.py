@@ -24,14 +24,22 @@ class UserSerializer(serializers.ModelSerializer):
     Custom serializer for creating a User
     """
     profile = ProfileSerializer(required=False)
+    is_following = serializers.SerializerMethodField()
 
     class Meta:
         model = get_user_model()
-        fields = ('id', 'name', 'email', 'password', 'location', 'profile')
+        fields = ('id', 'name', 'email', 'password', 'location', 'profile',
+                  'is_following')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5},
                         'email': {'required': True},
                         'name': {'required': True},
                         }
+
+    def get_is_following(self, obj):
+        user =  self.context['request'].user
+        if obj in user.following.all():
+            return True
+        return False
 
     def create(self, validated_data):
         password = validated_data.pop('password')
