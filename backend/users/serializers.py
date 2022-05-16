@@ -37,8 +37,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_is_following(self, obj):
         user =  self.context['request'].user
-        if obj in user.following.all():
-            return True
+        if hasattr(user, 'following'):
+            if obj in user.following.all():
+                return True
+            return False
         return False
 
     def create(self, validated_data):

@@ -32,7 +32,7 @@ class PlaceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
-        request_user =  self.context['request'].user
+        # request_user =  self.context['request'].user
         rep = super().to_representation(instance)
         users_have_visited = rep.pop('users_have_visited', None)
         visited_users = []
