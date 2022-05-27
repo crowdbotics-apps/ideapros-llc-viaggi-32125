@@ -5,6 +5,7 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from allauth.socialaccount.helpers import complete_social_login
 from allauth.account import app_settings as allauth_settings
 
+from users.models import Profile
 
 
 class CustomAppleSocialLoginSerializer(SocialLoginSerializer):
@@ -125,6 +126,8 @@ class CustomAppleSocialLoginSerializer(SocialLoginSerializer):
             login.save(request, connect=True)
 
         attrs["user"] = login.account.user
+        user = attrs["user"]
+        profile, _ = Profile.objects.get_or_create(user=user)
         return attrs
 
 
@@ -138,4 +141,6 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
+        user = attrs["user"]
+        profile, _ = Profile.objects.get_or_create(user=user)
         return attrs
