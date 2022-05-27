@@ -1,10 +1,10 @@
 from rest_auth.registration.serializers import SocialLoginSerializer, SocialConnectMixin
 from rest_framework import serializers
 from django.http import HttpRequest
-from django.contrib.auth import get_user_model
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from allauth.socialaccount.helpers import complete_social_login
 from allauth.account import app_settings as allauth_settings
+
 
 
 class CustomAppleSocialLoginSerializer(SocialLoginSerializer):
@@ -132,3 +132,10 @@ class CustomAppleConnectSerializer(
     SocialConnectMixin, CustomAppleSocialLoginSerializer
 ):
     pass
+
+
+class CustomSocialLoginSerializer(SocialLoginSerializer):
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        return attrs

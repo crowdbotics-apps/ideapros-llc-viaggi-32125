@@ -190,3 +190,6 @@ class Visited(UUIDModel):
     description = models.TextField(
         blank=True
     )
+
+    class Meta:
+        verbose_name_plural = "Visited"
