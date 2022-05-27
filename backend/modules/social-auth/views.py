@@ -1,4 +1,3 @@
-from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
@@ -11,7 +10,7 @@ from rest_auth.registration.views import SocialLoginView, SocialConnectView
 from .serializers import CustomAppleSocialLoginSerializer, CustomAppleConnectSerializer, CustomSocialLoginSerializer
 from django.contrib.sites.shortcuts import get_current_site
 
-from users.serializers import UserProfileSerializer
+from users.serializers import UserSerializer
 
 try:
     APP_DOMAIN = f"https://{get_current_site(None)}"
@@ -34,8 +33,8 @@ class FacebookLogin(SocialLoginView):
     def get_response(self):
         token = self.token
         user = self.user
-        serializer = UserProfileSerializer(user)
-        return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)  
+        serializer = UserSerializer(user)
+        return Response({'token': token.key, 'user': serializer.data})  
 
 
 
@@ -53,8 +52,8 @@ class GoogleLogin(SocialLoginView):
     def get_response(self):
         token = self.token
         user = self.user
-        serializer = UserProfileSerializer(user)
-        return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)  
+        serializer = UserSerializer(user)
+        return Response({'token': token.key, 'user': serializer.data})  
 
 
 class AppleLogin(SocialLoginView):
@@ -72,8 +71,8 @@ class AppleLogin(SocialLoginView):
     def get_response(self):
         token = self.token
         user = self.user
-        serializer = UserProfileSerializer(user)
-        return Response({'token': token.key, 'user': serializer.data}, status=status.HTTP_200_OK)   
+        serializer = UserSerializer(user)
+        return Response({'token': token.key, 'user': serializer.data})   
 
 
 
