@@ -33,7 +33,7 @@ class FacebookLogin(SocialLoginView):
     def get_response(self):
         token = self.token
         user = self.user
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'request': self.request})
         return Response({'token': token.key, 'user': serializer.data})  
 
 
@@ -52,7 +52,7 @@ class GoogleLogin(SocialLoginView):
     def get_response(self):
         token = self.token
         user = self.user
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'request': self.request})
         return Response({'token': token.key, 'user': serializer.data})  
 
 
@@ -71,7 +71,7 @@ class AppleLogin(SocialLoginView):
     def get_response(self):
         token = self.token
         user = self.user
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user, context={'request': self.request})
         return Response({'token': token.key, 'user': serializer.data})   
 
 
