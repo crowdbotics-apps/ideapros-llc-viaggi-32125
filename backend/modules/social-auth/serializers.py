@@ -127,7 +127,18 @@ class CustomAppleSocialLoginSerializer(SocialLoginSerializer):
 
         attrs["user"] = login.account.user
         user = attrs["user"]
-        profile, _ = Profile.objects.get_or_create(user=user)
+        profile, created = Profile.objects.get_or_create(user=user)
+        if created:
+            if user.name == '' or user.name == None:
+                if user.first_name:
+                    first_name = user.first_name
+                else:
+                    first_name = ''
+                if user.last_name:
+                    last_name = user.last_name
+                else:
+                    last_name = ''
+                user.name = first_name + ' ' + last_name
         return attrs
 
 
@@ -142,5 +153,16 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
         user = attrs["user"]
-        profile, _ = Profile.objects.get_or_create(user=user)
+        profile, created = Profile.objects.get_or_create(user=user)
+        if created:
+            if user.name == '' or user.name == None:
+                if user.first_name:
+                    first_name = user.first_name
+                else:
+                    first_name = ''
+                if user.last_name:
+                    last_name = user.last_name
+                else:
+                    last_name = ''
+                user.name = first_name + ' ' + last_name
         return attrs

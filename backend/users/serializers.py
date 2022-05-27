@@ -28,11 +28,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ('id', 'name', 'email', 'password', 'location', 'profile',
+        fields = ('id', 'name', 'first_name', 'last_name', 
+                  'email', 'password', 'location', 'profile',
                   'is_following')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5},
                         'email': {'required': True},
                         'name': {'required': True},
+                        'first_name': {'required': False},
+                        'last_name': {'required': False}
                         }
 
     def get_is_following(self, obj):
