@@ -139,6 +139,7 @@ class CustomAppleSocialLoginSerializer(SocialLoginSerializer):
                 else:
                     last_name = ''
                 user.name = first_name + ' ' + last_name
+                user.save()
         return attrs
 
 
@@ -165,4 +166,5 @@ class CustomSocialLoginSerializer(SocialLoginSerializer):
                 else:
                     last_name = ''
                 user.name = first_name + ' ' + last_name
+                user.save()
         return attrs
