@@ -8,13 +8,14 @@ from rest_framework.permissions import IsAuthenticated
 from allauth.account.models import EmailAddress
 from django_filters.rest_framework import DjangoFilterBackend
 from ideapros_llc_viaggi_32125.settings import SECRET_KEY
+from notifications.models import Notification
 
-from users.models import User
+from users.models import FollowRequest, User
 from users.authentication import ExpiringTokenAuthentication
 from home.permissions import IsPostOrIsAuthenticated
 
-from home.utility import auth_token, send_otp
-from users.serializers import ChangePasswordSerializer, CustomAuthTokenSerializer, OTPSerializer, UserSerializer
+from home.utility import auth_token, send_notification, send_otp
+from users.serializers import ChangePasswordSerializer, CustomAuthTokenSerializer, FollowRequestSerializer, OTPSerializer, UserSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -103,12 +104,82 @@ class UserViewSet(ModelViewSet):
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
             return Response({'detail': 'Invalid User ID'}, status=status.HTTP_400_BAD_REQUEST)
+        if user.private_mode:
+            follow_request, created = FollowRequest.objects.get_or_create(
+                recipient=user,
+                sender=request.user
+            )
+            send_notification(
+                user=user,
+                title="{} has sent you a follow request".format(request.user.name),
+                content="{} has sent you a follow request".format(request.user.name),
+                data_type="follow_request",
+                data=follow_request.id
+            )
+            return Response("Follow request sent successfully", status=status.HTTP_200_OK)
         request.user.following.add(user)
-        serializer = UserSerializer(
-                     request.user.following.all(),
-                     many=True,
-                     ontext={'request': request})
-        return Response(serializer.data)
+        send_notification(
+            user=user,
+            title="{} has started following you".format(request.user.name),
+            content="{} has started following you".format(request.user.name),
+            data_type="new_follower",
+            data=request.user.id
+        )
+        return Response("User followed successfully", status=status.HTTP_200_OK)
+
+    # My Follow Requests
+    @action(detail=False, methods=['get'])
+    def follow_requests(self, request):
+        received_serializer = FollowRequestSerializer(
+            request.user.received_follow_requests.all(),
+            many=True,
+            context={'request': request}
+        )
+        sent_serializer = FollowRequestSerializer(
+            request.user.sent_follow_requests.all(),
+            many=True,
+            context={'request': request}
+        )
+        return Response(
+            {
+                'received': received_serializer.data,
+                'sent': sent_serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    # Approve or Decline follow request
+    @action(detail=False, methods=['post'])
+    def approval(self, request):
+        resp = request.data.get('status', None)
+        follow_request_id = request.data.get('follow_request', None)
+        follow_request = FollowRequest.objects.get(
+            id=follow_request_id
+        )
+        if resp == "approve":
+            request.user.following.add(
+                follow_request.sender
+            )
+            send_notification(
+                user=follow_request.sender,
+                title="{} has accepted your follow request".format(request.user.name),
+                content="{} has accepted your follow request".format(request.user.name),
+                data_type="accepted_follower",
+                data=request.user.id
+            )
+            follow_request.delete()
+            return Response("Follow request approved successfully", status=status.HTTP_200_OK)
+        elif resp == 'decline':
+            send_notification(
+                user=follow_request.sender,
+                title="{} has declined your follow request".format(request.user.name),
+                content="{} has declined your follow request".format(request.user.name),
+                data_type="declined_follower",
+                data=request.user.id
+            )
+            follow_request.delete()
+            return Response("Follow request declined successfully", status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     # Unfollow a FF
     @action(detail=False, methods=['post'])

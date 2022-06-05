@@ -1,10 +1,59 @@
 from django.core.mail import EmailMessage
 from rest_framework.authtoken.models import Token
 
-from ideapros_llc_viaggi_32125.settings import PLACES_API_KEY
+from ideapros_llc_viaggi_32125.settings import FCM_SERVER_KEY, PLACES_API_KEY
+from notifications.models import Notification
 
 import pyotp
 import requests
+from requests.structures import CaseInsensitiveDict
+
+
+url = "https://fcm.googleapis.com/fcm/send"
+
+headers = CaseInsensitiveDict()
+headers["Accept"] = "application/json"
+headers["Authorization"] = "key={}".format(FCM_SERVER_KEY)
+headers["Content-Type"] = "application/json"
+
+
+def send_notification(user, title, content, data=None, data_type=None):
+    notif = Notification.objects.create(
+            user=user,
+            title=title,
+            content=content,
+            data=data,
+            data_type=data_type
+    )
+    notif_id = str(notif)
+    if user.registration_id:
+        if data is None:
+            payload = {
+                    'to': user.registration_id,
+                    'notification': {
+                        "title": title,
+                        "text": content
+                    },
+                    'data': {
+                        "notif_id": notif_id,
+                    }
+                }
+        elif data and data_type:
+            data = str(data)
+            data_type = str(data_type)
+            payload = {
+                    'to': user.registration_id,
+                    'notification': {
+                        "title": title,
+                        "text": content
+                    },
+                    'data': {
+                        "type": data_type,
+                        "redirect_user_id": data,
+                        "notif_id": notif_id,
+                    }
+                }
+        resp = requests.post(url, headers=headers, json=payload)
 
 
 def generateOTP(email=None, user=None):

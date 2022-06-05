@@ -52,7 +52,8 @@ INSTALLED_APPS = [
 LOCAL_APPS = [
     'home',
     'users.apps.UsersConfig',
-    'myplaces'
+    'myplaces',
+    'notifications'
 ]
 THIRD_PARTY_APPS = [
     'rest_framework',
@@ -281,3 +282,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
     }
 }
+
+
+FCM_SERVER_KEY = env.str("FCM_SERVER_KEY", "")

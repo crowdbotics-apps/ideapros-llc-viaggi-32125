@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
 from allauth.account.models import EmailAddress
 
-from users.models import Profile, User
+from users.models import FollowRequest, Profile, User
 from home.utility import verifyOTP
 
 
@@ -30,12 +30,14 @@ class UserSerializer(serializers.ModelSerializer):
         model = get_user_model()
         fields = ('id', 'name', 'first_name', 'last_name', 
                   'email', 'password', 'location', 'profile',
-                  'is_following')
+                  'is_following', 'private_mode', 'registration_id')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5},
                         'email': {'required': True},
                         'name': {'required': True},
                         'first_name': {'required': False},
-                        'last_name': {'required': False}
+                        'last_name': {'required': False},
+                        'private_mode': {'required': False},
+                        'registration_id': {'required': False}
                         }
 
     def get_is_following(self, obj):
@@ -64,6 +66,18 @@ class UserSerializer(serializers.ModelSerializer):
             nested_data = validated_data.pop('profile')
             nested_serializer.update(nested_instance, nested_data)
         return super(UserSerializer, self).update(instance, validated_data)
+
+
+class FollowRequestSerializer(serializers.ModelSerializer):
+    """
+    A custom serializer to represent the Users of a Follow Request
+    """
+    sender = UserSerializer()
+    recipient = UserSerializer()
+
+    class Meta:
+        model = FollowRequest
+        fields = '__all__'
 
 
 class OTPSerializer(serializers.Serializer):

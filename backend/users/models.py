@@ -21,7 +21,12 @@ class User(AbstractUser):
     activation_key = models.CharField(max_length=255, blank=True, null=True)
     otp = models.CharField(max_length=6, blank=True, null=True)
     location = PointField(blank=True, null=True)
-    following = models.ManyToManyField("self", blank=True, symmetrical=False)
+    following = models.ManyToManyField("self", blank=True, symmetrical=True)
+    private_mode = models.BooleanField(default=False)
+    registration_id = models.CharField(
+        max_length=255,
+        blank=True
+    )
 
     def get_absolute_url(self):
         return reverse("users:detail", kwargs={"username": self.username})
@@ -97,3 +102,20 @@ class Profile(UUIDModel):
 
     def __str__(self):
         return self.user.email or '--empty--'
+
+
+class FollowRequest(UUIDModel):
+    """
+    A data representation of the follow request sent from
+    one User to another
+    """
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='received_follow_requests'
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='sent_follow_requests'
+    )
