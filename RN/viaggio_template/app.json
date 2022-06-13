@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "automates",
+    "slug": "automates",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.crowdbotics.ideapros-llc-automa-31974-id"
+    }
+  },
+  "name": "automates"
+}
