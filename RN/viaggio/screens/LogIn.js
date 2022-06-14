@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {
   View,
   ImageBackground,
@@ -8,10 +8,23 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import AsyncStorage from '@react-native-community/async-storage';
+
 const Blank = ({navigation}) => {
 
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
+
+  useEffect(() => {
+    setTimeout(() => {
+      AsyncStorage.getItem('user_id_vg').then((value) =>
+        navigation.replace(
+          value !== null ? 'CreateProfile_1' : '' 
+        ),
+      );
+    }, 100);
+    // AsyncStorage.clear();
+  }, []);
 
   const handleSubmitButton = () => {
     
@@ -25,7 +38,7 @@ const Blank = ({navigation}) => {
     }
     
     var dataToSend = {
-      username: userEmail,
+      email: userEmail,
       password: userPassword,
     };
     // var newData = {
@@ -43,7 +56,7 @@ const Blank = ({navigation}) => {
     console.log(formBody);
     // navigation.replace('MyDrawer');
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/login/', {
       method: 'POST',
       // body: JSON.stringify(newData),
       body: formBody,
@@ -54,9 +67,11 @@ const Blank = ({navigation}) => {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+        AsyncStorage.setItem('user_id_vg', responseJson.user.id);
+        AsyncStorage.setItem('user_token_vg', responseJson.token);
+
+        navigation.replace('CreateProfile_1');
       })
       .catch((error) => {
         console.error(error);
@@ -95,10 +110,10 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_6}>
             <TouchableOpacity
-              // onPress={() => navigation.navigate('ForgotPassword')}
+              onPress={() => navigation.navigate('ForgotPassword')}
               // onPress={() => navigation.navigate('Verification')}
               // onPress={() => navigation.navigate('ResetPassword')}
-              onPress={() => navigation.navigate('Onboarding_1')}
+              // onPress={() => navigation.navigate('Onboarding_1')}
             >
               <Text style={styles.Text_88}>
               Forgot Password?
@@ -108,8 +123,8 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('CreateProfile_1')}
+              onPress={() => handleSubmitButton()}
+              // onPress={() => navigation.navigate('CreateProfile_1')}
             >
               <Text style={styles.Text_90}>
               Sign In

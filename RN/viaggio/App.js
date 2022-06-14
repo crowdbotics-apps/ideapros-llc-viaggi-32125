@@ -67,6 +67,7 @@ function App() {
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{headerShown: false}}/>
         <Stack.Screen name="Verification" component={Verification} options={{headerShown: false}}/>
         <Stack.Screen name="ResetPassword" component={ResetPassword} options={{headerShown: false}}/>
+        <Stack.Screen name="LogIn" component={LogIn} options={{headerShown: false}}/>
         <Stack.Screen name="SignUp" component={SignUp} options={{headerShown: false}}/>
         <Stack.Screen name="CreateProfile_1" component={CreateProfile_1} options={{headerShown: false}}/>
         <Stack.Screen name="CreateProfile_2" component={CreateProfile_2} options={{headerShown: false}}/>

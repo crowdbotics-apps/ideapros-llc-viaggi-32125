@@ -8,59 +8,15 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import AsyncStorage from '@react-native-community/async-storage';
+
 const Blank = ({navigation}) => {
 
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
 
   const handleSubmitButton = () => {
-    // navigation.replace('LogIn');
-
-    if (!userEmail) {
-      alert('Please fill Email');
-      return;
-    }
-    if (!userPassword) {
-      alert('Please fill Password');
-      return;
-    }
     
-    var dataToSend = {
-      username: userEmail,
-      password: userPassword,
-    };
-    // var newData = {
-    //   username: "test_user",
-    //   password: "test_user_12345"
-    // }
-    var formBody = [];
-    for (var key in dataToSend) {
-      var encodedKey = encodeURIComponent(key);
-      var encodedValue = encodeURIComponent(dataToSend[key]);
-      formBody.push(encodedKey + '=' + encodedValue);
-      // formBody.push(key + '=' + dataToSend[key]);
-    }
-    formBody = formBody.join('&');
-    console.log(formBody);
-
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
-      method: 'POST',
-      // body: JSON.stringify(newData),
-      body: formBody,
-      headers: {
-        //Header Defination
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        // console.log("hello");
-        console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    AsyncStorage.setItem('user_onboarding_status', "true");
+    navigation.replace('LogIn');
     
   };
 
@@ -93,8 +49,7 @@ const Blank = ({navigation}) => {
             </Text>
             <View style={styles.View_7}>
               <TouchableOpacity
-                // onPress={() => handleSubmitButton()}
-                onPress={() => navigation.navigate('LogIn')}
+                onPress={() => handleSubmitButton()}
               >
                 <Text style={styles.Text_90}>
                   Get Started

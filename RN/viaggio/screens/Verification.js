@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {
   View,
   ImageBackground,
@@ -8,55 +8,56 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import AsyncStorage from '@react-native-community/async-storage';
+
 const Blank = ({navigation}) => {
 
+  const [Otp1, setOtp1] = useState("");
+  const [Otp2, setOtp2] = useState("");
+  const [Otp3, setOtp3] = useState("");
+  const [Otp4, setOtp4] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+
+  useEffect(() => {
+      AsyncStorage.getItem('user_email_for_token').then((value) =>
+        setUserEmail(value),
+      );
+  }, []);
 
   const handleSubmitButton = () => {
     
-    if (!userEmail) {
-      alert('Please fill Email');
-      return;
-    }
-    if (!userPassword) {
-      alert('Please fill Password');
+    if (!Otp1 && !Otp2 && !Otp3 && !Otp4) {
+      alert('Please fill Token');
       return;
     }
     
     var dataToSend = {
-      username: userEmail,
-      password: userPassword,
+      otp: Otp1 + Otp2 + Otp3 + Otp4,
+      email: userEmail,
     };
-    // var newData = {
-    //   username: "test_user",
-    //   password: "test_user_12345"
-    // }
+    
     var formBody = [];
     for (var key in dataToSend) {
       var encodedKey = encodeURIComponent(key);
       var encodedValue = encodeURIComponent(dataToSend[key]);
       formBody.push(encodedKey + '=' + encodedValue);
-      // formBody.push(key + '=' + dataToSend[key]);
     }
     formBody = formBody.join('&');
     console.log(formBody);
-    // navigation.replace('MyDrawer');
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/verify/', {
       method: 'POST',
-      // body: JSON.stringify(newData),
       body: formBody,
       headers: {
-        //Header Defination
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+        AsyncStorage.setItem('user_token_vg', responseJson.token);
+
+        navigation.replace('ResetPassword');
       })
       .catch((error) => {
         console.error(error);
@@ -83,16 +84,15 @@ const Blank = ({navigation}) => {
           </Text>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="5" onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
-            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
-            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
-            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
+            <TextInput style={styles.TextInput_1} placeholder="5" onChangeText={(Otp1) => setOtp1(Otp1)} />
+            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(Otp2) => setOtp2(Otp2)} />
+            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(Otp3) => setOtp3(Otp3)} />
+            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(Otp4) => setOtp4(Otp4)} />
           </View>
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('LogIn')}
+              onPress={() => handleSubmitButton()}
             >
               <Text style={styles.Text_90}>
               Verify Now

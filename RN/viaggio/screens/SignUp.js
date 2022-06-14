@@ -8,13 +8,20 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
-const Blank = ({navigation}) => {
+import AsyncStorage from '@react-native-community/async-storage';
 
+const Blank = ({navigation}) => {
+  const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
+  const [LoadingEffect, setLoadingEffect] = useState(false);
+  const [RegistrationSuccess, setRegistrationSuccess] = useState(false);
 
   const handleSubmitButton = () => {
-    
+    if (!userName) {
+      alert('Please fill Email');
+      return;
+    }
     if (!userEmail) {
       alert('Please fill Email');
       return;
@@ -23,40 +30,40 @@ const Blank = ({navigation}) => {
       alert('Please fill Password');
       return;
     }
+    setLoadingEffect(true);
     
     var dataToSend = {
-      username: userEmail,
+      name: userName,
+      email: userEmail,
       password: userPassword,
     };
-    // var newData = {
-    //   username: "test_user",
-    //   password: "test_user_12345"
-    // }
     var formBody = [];
     for (var key in dataToSend) {
       var encodedKey = encodeURIComponent(key);
       var encodedValue = encodeURIComponent(dataToSend[key]);
       formBody.push(encodedKey + '=' + encodedValue);
-      // formBody.push(key + '=' + dataToSend[key]);
     }
     formBody = formBody.join('&');
     console.log(formBody);
-    // navigation.replace('MyDrawer');
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/', {
       method: 'POST',
-      // body: JSON.stringify(newData),
       body: formBody,
       headers: {
-        //Header Defination
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+        setLoadingEffect(false);
+        setRegistrationSuccess(true);
+        AsyncStorage.setItem('user_id_vg', responseJson.user.id);
+        AsyncStorage.setItem('user_token_vg', responseJson.token);
+        setTimeout(() => {
+          setRegistrationSuccess(false);
+          navigation.replace('LogIn');
+        }, 5000);
       })
       .catch((error) => {
         console.error(error);
@@ -71,6 +78,16 @@ const Blank = ({navigation}) => {
     >
       <View style={styles.View_3}>
 
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
+
+        {RegistrationSuccess && <View style={styles.Loading_effect}>
+          <Text style={styles.Loading_effect_text}>
+            Registration Successful
+          </Text>
+        </View>}
+
         <ImageBackground source={require ('../assets/images/viaggi_splash_logo.png')} style={styles.ImageBackground_86_909} />
 
         <View style={styles.View_2}>
@@ -80,7 +97,7 @@ const Blank = ({navigation}) => {
           </Text>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Your Name" onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
+            <TextInput style={styles.TextInput_1} placeholder="Your Name" onChangeText={(UserName) => setUserName(UserName)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/login_user_icon.png')} style={styles.input_user_icon} />
             </View>
@@ -170,6 +187,44 @@ const styles = StyleSheet.create({
  
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
+  },
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
+  Loading_effect_text: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#3dc0b9",
+    backgroundColor: "rgba(61, 192, 185, .2)",
+    padding: 20,
+    borderRadius: 10,
+    textAlign: "center",
+    position: "absolute",
+    justifyContent: "center",
+    top: "50%",
+    left: "50%",
+    width: 300,
+    height: 80,
+    marginTop: -40,
+    marginLeft: -150,
+    lineHeight: 35,
   },
   View_3: {
     width: "100%",

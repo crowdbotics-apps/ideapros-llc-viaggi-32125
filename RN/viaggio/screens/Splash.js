@@ -28,19 +28,19 @@ const Blank = ({navigation}) => {
   useEffect(() => {
     setTimeout(() => {
       setAnimating(false);
-      //Check if user_id is set or not
-      //If not then send for Authentication
-      //else send to Home Screen
-      // let value = null;
-      // navigation.replace(
-      //   value === null ? 'Auth' : 'MainScreen'
-      // )
-      AsyncStorage.getItem('user_id').then((value) =>
-        navigation.replace(
-          value === null ? 'Auth' : 'LogIn'
-        ),
+
+      AsyncStorage.getItem('user_onboarding_status').then((value) =>
+      navigation.replace(
+        value === null ? 'Onboarding_1' : 'ForgotPassword'
+      ),
       );
-    }, 1000);
+      
+      // AsyncStorage.getItem('user_id_vg').then((value) =>
+      //   navigation.replace(
+      //     value === null ? 'Onboarding_1' : 'CreateProfile_1'
+      //   ),
+      // );
+    }, 3000);
   }, []);
 
 

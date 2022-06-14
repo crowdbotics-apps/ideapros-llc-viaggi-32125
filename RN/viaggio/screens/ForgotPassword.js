@@ -8,10 +8,12 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import AsyncStorage from '@react-native-community/async-storage';
+
 const Blank = ({navigation}) => {
 
   const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [otpSendSuccess, setOtpSendSuccess] = useState(false);
 
   const handleSubmitButton = () => {
     // navigation.replace('LogIn');
@@ -20,43 +22,37 @@ const Blank = ({navigation}) => {
       alert('Please fill Email');
       return;
     }
-    if (!userPassword) {
-      alert('Please fill Password');
-      return;
-    }
     
     var dataToSend = {
-      username: userEmail,
-      password: userPassword,
+      email: userEmail
     };
-    // var newData = {
-    //   username: "test_user",
-    //   password: "test_user_12345"
-    // }
     var formBody = [];
     for (var key in dataToSend) {
       var encodedKey = encodeURIComponent(key);
       var encodedValue = encodeURIComponent(dataToSend[key]);
       formBody.push(encodedKey + '=' + encodedValue);
-      // formBody.push(key + '=' + dataToSend[key]);
     }
     formBody = formBody.join('&');
     console.log(formBody);
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/otp/', {
       method: 'POST',
-      // body: JSON.stringify(newData),
       body: formBody,
       headers: {
-        //Header Defination
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
       },
     })
-      .then((response) => response.json())
+      .then((response) => response.status)
       .then((responseJson) => {
-        // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+        setOtpSendSuccess(true);
+        if (responseJson === 200) {
+          AsyncStorage.setItem('user_email_for_token', userEmail);
+          setTimeout(() => {
+            setOtpSendSuccess(false);
+            navigation.replace('Verification');
+          }, 3000);
+        }
       })
       .catch((error) => {
         console.error(error);
@@ -70,6 +66,12 @@ const Blank = ({navigation}) => {
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {otpSendSuccess && <View style={styles.Loading_effect}>
+          <Text style={styles.Loading_effect_text}>
+            Email sent with Token
+          </Text>
+        </View>}
 
         <ImageBackground source={require ('../assets/images/viaggi_splash_logo.png')} style={styles.ImageBackground_86_909} />
 
@@ -91,8 +93,7 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('LogIn')}
+              onPress={() => handleSubmitButton()}
             >
               <Text style={styles.Text_90}>
               Send OTP
@@ -112,6 +113,35 @@ const styles = StyleSheet.create({
  
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
+  },
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_text: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#3dc0b9",
+    backgroundColor: "rgba(61, 192, 185, .2)",
+    padding: 20,
+    borderRadius: 10,
+    textAlign: "center",
+    position: "absolute",
+    justifyContent: "center",
+    top: "50%",
+    left: "50%",
+    width: 300,
+    height: 80,
+    marginTop: -40,
+    marginLeft: -150,
+    lineHeight: 35,
   },
   View_3: {
     width: "100%",
