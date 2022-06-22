@@ -29,9 +29,11 @@ const Blank = ({navigation}) => {
     setTimeout(() => {
       setAnimating(false);
 
+      AsyncStorage.clear();
+
       AsyncStorage.getItem('user_onboarding_status').then((value) =>
       navigation.replace(
-        value === null ? 'Onboarding_1' : 'ForgotPassword'
+        value === null ? 'Onboarding_1' : 'LogIn'
       ),
       );
       

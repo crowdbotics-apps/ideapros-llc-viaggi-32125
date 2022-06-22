@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {
   View,
   ImageBackground,
@@ -10,53 +10,74 @@ import {
 } from "react-native"
 const Blank = ({navigation}) => {
 
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [LoadingEffect, setLoadingEffect] = useState(false);
+  const [userDob, setUserDob] = useState("");
+  const [userGender, setUserGender] = useState("");
+  const [userCity, setUserCity] = useState("");
+  const [userZip, setUserZip] = useState("");
+  const [userState, setUserState] = useState("");
+  const [userCountry, setUserCountry] = useState("");
+  const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
 
   const handleSubmitButton = () => {
     
-    if (!userEmail) {
-      alert('Please fill Email');
+    if (!userDob) {
+      alert('Please add date of birth');
       return;
     }
-    if (!userPassword) {
-      alert('Please fill Password');
+    if (!userGender) {
+      alert('Please add gender');
       return;
     }
+    if (!userCity) {
+      alert("Please add city")
+      return;
+    }
+    if (!userZip) {
+      alert("Please add zip code")
+      return;
+    }
+    if (!userState) {
+      alert("Please add state")
+      return;
+    }
+    if (!userCountry) {
+      alert("Please add country")
+      return;
+    }
+
+    setLoadingEffect(true);
     
     var dataToSend = {
-      username: userEmail,
-      password: userPassword,
+      "profile.bob": userDob,
+      "profile.gender": userGender,
+      "profile.city": userCity,
+      "profile.zip_code": userZip,
+      "profile.state": userState,
+      "profile.country": userCountry,
     };
-    // var newData = {
-    //   username: "test_user",
-    //   password: "test_user_12345"
-    // }
     var formBody = [];
     for (var key in dataToSend) {
       var encodedKey = encodeURIComponent(key);
       var encodedValue = encodeURIComponent(dataToSend[key]);
       formBody.push(encodedKey + '=' + encodedValue);
-      // formBody.push(key + '=' + dataToSend[key]);
     }
     formBody = formBody.join('&');
     console.log(formBody);
-    // navigation.replace('MyDrawer');
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
-      method: 'POST',
-      // body: JSON.stringify(newData),
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/d0101b88-e82d-414f-ac72-adb86042a057/', {
+      method: 'PATCH',
       body: formBody,
       headers: {
-        //Header Defination
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Authorization': `Token ${userToken}`,
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+        setLoadingEffect(false);
+        navigation.replace('Location');
       })
       .catch((error) => {
         console.error(error);
@@ -64,12 +85,41 @@ const Blank = ({navigation}) => {
     
   };
 
+  useEffect(() => {
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/eb9b5e84-cadf-4e5d-805f-a238b79a746c/', {
+      method: 'GET',
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': `Token ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log("Response all vehicle: ", responseJson);
+        setUserDob(responseJson.profile.dob);
+        setUserGender(responseJson.profile.gender);
+        setUserCity(responseJson.profile.city);
+        setUserZip(responseJson.profile.zip_code);
+        setUserState(responseJson.profile.state);
+        setUserCountry(responseJson.profile.country);
+        })
+      .catch((error) => {
+        console.error(error);
+      });
+
+  }, [])
+
+
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
 
         <TouchableOpacity onPress={() => navigation.goBack()} >
           <ImageBackground source={require ('../assets/images/left_arrow.png')} style={styles.back_icon} />
@@ -82,14 +132,14 @@ const Blank = ({navigation}) => {
           </Text>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Date Of Birth" onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
+            <TextInput style={styles.TextInput_1} placeholder="Date Of Birth" value={userDob} onChangeText={(userDob) => setUserDob(userDob)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/calender_icon.png')} style={styles.input_calender_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Gender" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="Gender" value={userGender}  onChangeText={(UserGender) => setUserGender(UserGender)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/login_user_icon.png')} style={styles.input_user_icon} />
             </View>
@@ -103,28 +153,28 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="City" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="City" value={userCity} onChangeText={(UserCity) => setUserCity(UserCity)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Zipcode" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="Zipcode" value={userZip} onChangeText={(UserZip) => setUserZip(UserZip)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="State" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="State" value={userState} onChangeText={(UserState) => setUserState(UserState)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Country" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="Country" value={userCountry} onChangeText={(UserCountry) => setUserCountry(UserCountry)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
             </View>
@@ -132,8 +182,8 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('Interests')}
+              onPress={() => handleSubmitButton()}
+              // onPress={() => navigation.navigate('Interests')}
             >
               <Text style={styles.Text_90}>
               Continue
@@ -150,7 +200,26 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },

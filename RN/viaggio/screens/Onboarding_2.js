@@ -92,7 +92,7 @@ const Blank = ({navigation}) => {
               Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy tex.
             </Text>
             <View style={styles.View_7}>
-              <TouchableOpacity
+              <TouchableOpacity style={styles.Touchable_full_cover}
                 // onPress={() => handleSubmitButton()}
                 onPress={() => navigation.navigate('Onboarding_3')}
               >
@@ -113,7 +113,11 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Touchable_full_cover: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },

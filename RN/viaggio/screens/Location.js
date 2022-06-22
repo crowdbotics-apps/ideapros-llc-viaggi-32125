@@ -14,6 +14,8 @@ const Blank = ({navigation}) => {
   const [userPassword, setUserPassword] = useState("");
 
   const handleSubmitButton = () => {
+
+    console.log("Location Updated: ")
     
     if (!userEmail) {
       alert('Please fill Email');
@@ -89,8 +91,8 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('CreateProfile_2')}
+              onPress={() => handleSubmitButton()}
+              // onPress={() => navigation.navigate('CreateProfile_2')}
             >
               <Text style={styles.Text_90}>
                 Allow Location

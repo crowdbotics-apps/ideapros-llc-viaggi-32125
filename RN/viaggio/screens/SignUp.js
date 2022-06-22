@@ -63,7 +63,7 @@ const Blank = ({navigation}) => {
         setTimeout(() => {
           setRegistrationSuccess(false);
           navigation.replace('LogIn');
-        }, 5000);
+        }, 1000);
       })
       .catch((error) => {
         console.error(error);
@@ -118,7 +118,7 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_7}>
-            <TouchableOpacity
+            <TouchableOpacity style={styles.Touchable_full_cover}
               onPress={() => handleSubmitButton()}
             >
               <Text style={styles.Text_90}>
@@ -184,7 +184,11 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Touchable_full_cover: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },

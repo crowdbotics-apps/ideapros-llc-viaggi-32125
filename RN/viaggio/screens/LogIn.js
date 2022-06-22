@@ -14,6 +14,7 @@ const Blank = ({navigation}) => {
 
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
+  const [LoadingEffect, setLoadingEffect] = useState(false);
 
   useEffect(() => {
     setTimeout(() => {
@@ -54,7 +55,7 @@ const Blank = ({navigation}) => {
     }
     formBody = formBody.join('&');
     console.log(formBody);
-    // navigation.replace('MyDrawer');
+    setLoadingEffect(true);
 
     fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/login/', {
       method: 'POST',
@@ -79,12 +80,42 @@ const Blank = ({navigation}) => {
     
   };
 
+  
+  const handleFbLogin = () => {
+    
+    
+    setLoadingEffect(true);
+
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/modules/social-auth/facebook/login/', {
+      method: 'POST',
+      // body: JSON.stringify(newData),
+      // body: formBody,
+      headers: {
+        //Header Defination
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        setLoadingEffect(false);
+        console.log("Response: ", responseJson);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
 
         <ImageBackground source={require ('../assets/images/viaggi_splash_logo.png')} style={styles.ImageBackground_86_909} />
 
@@ -122,7 +153,7 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_7}>
-            <TouchableOpacity
+            <TouchableOpacity style={styles.Touchable_full_cover}
               onPress={() => handleSubmitButton()}
               // onPress={() => navigation.navigate('CreateProfile_1')}
             >
@@ -141,7 +172,8 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_10}>
-            <TouchableOpacity style={styles.Touchable_10}>
+            <TouchableOpacity style={styles.Touchable_10} 
+            onPress={() => handleFbLogin()}>
                 <ImageBackground source={require ('../assets/images/login_fb_icon.png')} style={styles.login_fb_icon} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.Touchable_10}>
@@ -178,7 +210,26 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },
@@ -252,6 +303,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#F65F4D",
     borderRadius: 12,
     alignSelf: "center",
+  },
+  Touchable_full_cover: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
   },
   Text_90: {
     color: "#ffffff",

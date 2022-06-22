@@ -4,16 +4,97 @@ import {
   ImageBackground,
   TouchableOpacity,
   Text,
-  TextInput,
   StyleSheet,
   ScrollView
 } from "react-native"
+import {launchImageLibrary} from 'react-native-image-picker';
+
 const Blank = ({navigation}) => {
 
+  const [imageUploaded, setImageUploaded] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [LoadingEffect, setLoadingEffect] = useState(false);
+
+  const createFormData = (photo, body = {}) => {
+    const data = new FormData();
+  
+    data.append('photo', {
+      name: photo.fileName,
+      type: photo.type,
+      uri: Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+    });
+  
+    Object.keys(body).forEach((key) => {
+      data.append(key, body[key]);
+    });
+  
+    return data;
+  };
 
   const handleSubmitButton = () => {
+    if (!imageUploaded) {
+      alert('Please upload image');
+      return;
+    }
+
+    console.log('profile Image URI: ', profileImage.assets[0].uri);
+    console.log('profile Image File Name: ', profileImage.assets[0].fileName);
+    console.log('profile Image File Type: ', profileImage.assets[0].type);
+    console.log('profile Image File Size: ', profileImage.assets[0].fileSize);
+    console.log('profile Image File Width: ', profileImage.assets[0].width);
+    console.log('profile Image File Height: ', profileImage.assets[0].height);
+    let createdFormData = createFormData(profileImage, { userId: '123' })
+    // console.log( JSON.stringify(createdFormData) );
+
+    setLoadingEffect(true);
     
+    var dataToSend = {
+      "profile.photo": profileImage.assets[0].uri,
+      private_mode: false,
+    };
+    
+    var formBody = [];
+    for (var key in dataToSend) {
+      var encodedKey = encodeURIComponent(key);
+      var encodedValue = encodeURIComponent(dataToSend[key]);
+      formBody.push(encodedKey + '=' + encodedValue);
+    }
+    formBody = formBody.join('&');
+    console.log("FormBody: ", formBody);
+    const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
+
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/d0101b88-e82d-414f-ac72-adb86042a057/', {
+      method: 'PATCH',
+      body: formBody,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Authorization': `Token ${userToken}`,
+      },
+    })
+      .then((response) => response.text())
+      .then((responseJson) => {
+        console.log("Response: ", responseJson);
+        setLoadingEffect(false);
+        setImageUploaded(true);
+        navigation.replace("CreateProfile_2");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    
+   
   };
+  
+
+  const handleImageUpload = () => {
+    launchImageLibrary({ noData: true }, (response) => {
+      console.log(response);
+      if (response) {
+        setProfileImage(response);
+        setImageUploaded(true);
+      }
+    });
+  }
 
   return (
     <ScrollView
@@ -21,6 +102,10 @@ const Blank = ({navigation}) => {
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
 
         <TouchableOpacity onPress={() => navigation.goBack()} >
           <ImageBackground source={require ('../assets/images/left_arrow.png')} style={styles.back_icon} />
@@ -32,9 +117,9 @@ const Blank = ({navigation}) => {
             Let’s Create your Profile
           </Text>
 
-          <View style={styles.View_4}>
+          <TouchableOpacity style={styles.View_4} onPress={() => handleImageUpload()}>
             <ImageBackground source={require ('../assets/images/profile_white_icon.png')} style={styles.profile_icon_upload_picture} />
-          </View>
+          </TouchableOpacity>
 
           <View style={styles.View_5}>
             <Text style={styles.Text_88}>
@@ -47,8 +132,8 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('CreateProfile_2')}
+              onPress={() => handleSubmitButton()}
+              // onPress={() => navigation.navigate('CreateProfile_2')}
             >
               <Text style={styles.Text_90}>
               Continue
@@ -65,7 +150,26 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },
@@ -99,7 +203,8 @@ const styles = StyleSheet.create({
   View_4: {
     width: 235,
     height: 212,
-    backgroundColor: "rgba(246, 95, 77, 0.1)",
+    // backgroundColor: "rgba(246, 95, 77, 0.1)",
+    backgroundColor: "red",
     borderRadius: 15,
     marginBottom: 50,
     alignSelf: "center",

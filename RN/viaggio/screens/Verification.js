@@ -17,6 +17,8 @@ const Blank = ({navigation}) => {
   const [Otp3, setOtp3] = useState("");
   const [Otp4, setOtp4] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [LoadingEffect, setLoadingEffect] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
 
   useEffect(() => {
       AsyncStorage.getItem('user_email_for_token').then((value) =>
@@ -30,6 +32,8 @@ const Blank = ({navigation}) => {
       alert('Please fill Token');
       return;
     }
+
+    setLoadingEffect(true);
     
     var dataToSend = {
       otp: Otp1 + Otp2 + Otp3 + Otp4,
@@ -54,10 +58,13 @@ const Blank = ({navigation}) => {
     })
       .then((response) => response.json())
       .then((responseJson) => {
+        setLoadingEffect(false);
+        setOtpVerified(true);
         console.log("Response: ", responseJson);
         AsyncStorage.setItem('user_token_vg', responseJson.token);
-
-        navigation.replace('ResetPassword');
+        setTimeout(() => {
+          navigation.replace('ResetPassword');
+        }, 1000);
       })
       .catch((error) => {
         console.error(error);
@@ -71,6 +78,16 @@ const Blank = ({navigation}) => {
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
+
+        {otpVerified && <View style={styles.Loading_effect}>
+          <Text style={styles.Loading_effect_text}>
+            OPT verification successful. Redirecting to reset password screen ...
+          </Text>
+        </View>}
 
         <ImageBackground source={require ('../assets/images/viaggi_splash_logo.png')} style={styles.ImageBackground_86_909} />
 
@@ -91,7 +108,7 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_7}>
-            <TouchableOpacity
+            <TouchableOpacity style={styles.Touchable_full_cover}
               onPress={() => handleSubmitButton()}
             >
               <Text style={styles.Text_90}>
@@ -109,7 +126,49 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Touchable_full_cover: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+  },
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .90)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_text: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#3dc0b9",
+    backgroundColor: "rgba(61, 192, 185, .2)",
+    padding: 20,
+    borderRadius: 10,
+    textAlign: "center",
+    position: "absolute",
+    justifyContent: "center",
+    top: "50%",
+    left: "50%",
+    width: 300,
+    height: 150,
+    marginTop: -40,
+    marginLeft: -150,
+    lineHeight: 35,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },

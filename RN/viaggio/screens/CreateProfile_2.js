@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useEffect, useState} from "react"
 import {
   View,
   ImageBackground,
@@ -10,23 +10,44 @@ import {
 } from "react-native"
 const Blank = ({navigation}) => {
 
+  const [name, setName] = useState("");
+  const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [userPhone, setUserPhone] = useState("");
+  const [userBio, setUserBio] = useState("");
+  const [LoadingEffect, setLoadingEffect] = useState(false);
+  const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
 
   const handleSubmitButton = () => {
     
+    if (!name) {
+      alert('Please fill name');
+      return;
+    }
+    if (!userName) {
+      alert('Please fill user name');
+      return;
+    }
     if (!userEmail) {
-      alert('Please fill Email');
+      alert('Please fill email');
       return;
     }
-    if (!userPassword) {
-      alert('Please fill Password');
+    if (!userPhone) {
+      alert('Please fill phone number');
       return;
     }
+    if (!userBio) {
+      alert('Please fill bio');
+      return;
+    }
+    setLoadingEffect(true);
     
     var dataToSend = {
-      username: userEmail,
-      password: userPassword,
+      name: name,
+      username: userName,
+      email: userEmail,
+      "profile.phone": userPhone,
+      "profile.bio": userBio,
     };
     // var newData = {
     //   username: "test_user",
@@ -41,22 +62,23 @@ const Blank = ({navigation}) => {
     }
     formBody = formBody.join('&');
     console.log(formBody);
-    // navigation.replace('MyDrawer');
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
-      method: 'POST',
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/d0101b88-e82d-414f-ac72-adb86042a057/', {
+      method: 'PATCH',
       // body: JSON.stringify(newData),
       body: formBody,
       headers: {
         //Header Defination
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Authorization': `Token ${userToken}`,
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
         // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+        setLoadingEffect(false);
+        navigation.replace('CreateProfile_3');
       })
       .catch((error) => {
         console.error(error);
@@ -64,12 +86,40 @@ const Blank = ({navigation}) => {
     
   };
 
+  useEffect(() => {
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/eb9b5e84-cadf-4e5d-805f-a238b79a746c/', {
+      method: 'GET',
+      headers: {
+        'Content-Type':'application/json',
+        'Authorization': `Token ${userToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log("Response all vehicle: ", responseJson);
+        setName(responseJson.first_name);
+        setUserName(responseJson.name);
+        setUserEmail(responseJson.email);
+        setUserPhone(responseJson.profile.phone);
+        setUserBio(responseJson.profile.bio);
+        })
+      .catch((error) => {
+        console.error(error);
+      });
+
+  }, [])
+
+
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
 
         <TouchableOpacity onPress={() => navigation.goBack()} >
           <ImageBackground source={require ('../assets/images/left_arrow.png')} style={styles.back_icon} />
@@ -82,28 +132,28 @@ const Blank = ({navigation}) => {
           </Text>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Your Name" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="Your Name" value={name} onChangeText={(name) => setName(name)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/login_user_icon.png')} style={styles.input_user_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="User Name" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="User Name" value={userName} onChangeText={(UserName) => setUserName(UserName)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/login_user_icon.png')} style={styles.input_user_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Enter email address" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="Enter email address" value={userEmail} onChangeText={(UserEmail) => setUserEmail(UserEmail)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/login_email_icon.png')} style={styles.input_email_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Enter phone number" onChangeText={(UserPassword) => setUserPassword(UserPassword)} />
+            <TextInput style={styles.TextInput_1} placeholder="Enter phone number" value={userPhone} onChangeText={(UserPhone) => setUserPhone(UserPhone)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/phone_icon.png')} style={styles.input_phone_icon} />
             </View>
@@ -123,14 +173,16 @@ const Blank = ({navigation}) => {
               placeholder="Write your bio..."
               multiline={true}
               numberOfLines={10}
+              onChangeText={(UserBio) => setUserBio(UserBio)}
+              value={userBio}
               />
           </View>
 
           
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('CreateProfile_3')}
+              onPress={() => handleSubmitButton()}
+              // onPress={() => navigation.navigate('CreateProfile_3')}
             >
               <Text style={styles.Text_90}>
               Continue
@@ -147,7 +199,26 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },

@@ -14,6 +14,7 @@ const Blank = ({navigation}) => {
 
   const [userEmail, setUserEmail] = useState("");
   const [otpSendSuccess, setOtpSendSuccess] = useState(false);
+  const [LoadingEffect, setLoadingEffect] = useState(false);
 
   const handleSubmitButton = () => {
     // navigation.replace('LogIn');
@@ -22,7 +23,8 @@ const Blank = ({navigation}) => {
       alert('Please fill Email');
       return;
     }
-    
+    setLoadingEffect(true);
+
     var dataToSend = {
       email: userEmail
     };
@@ -45,13 +47,14 @@ const Blank = ({navigation}) => {
       .then((response) => response.status)
       .then((responseJson) => {
         console.log("Response: ", responseJson);
+        setLoadingEffect(false);
         setOtpSendSuccess(true);
         if (responseJson === 200) {
           AsyncStorage.setItem('user_email_for_token', userEmail);
           setTimeout(() => {
             setOtpSendSuccess(false);
             navigation.replace('Verification');
-          }, 3000);
+          }, 1000);
         }
       })
       .catch((error) => {
@@ -66,6 +69,10 @@ const Blank = ({navigation}) => {
       style={styles.ScrollView_1}
     >
       <View style={styles.View_3}>
+
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
 
         {otpSendSuccess && <View style={styles.Loading_effect}>
           <Text style={styles.Loading_effect_text}>
@@ -92,7 +99,7 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_7}>
-            <TouchableOpacity
+            <TouchableOpacity style={styles.Touchable_full_cover}
               onPress={() => handleSubmitButton()}
             >
               <Text style={styles.Text_90}>
@@ -113,6 +120,11 @@ const styles = StyleSheet.create({
  
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
+  },
+  Touchable_full_cover: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
   },
   Loading_effect: {
     position: "absolute",
@@ -142,6 +154,15 @@ const styles = StyleSheet.create({
     marginTop: -40,
     marginLeft: -150,
     lineHeight: 35,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
   },
   View_3: {
     width: "100%",
