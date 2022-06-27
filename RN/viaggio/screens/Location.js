@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import GetLocation from 'react-native-get-location'
 
 const Blank = ({navigation}) => {
 
@@ -17,6 +18,30 @@ const Blank = ({navigation}) => {
   const handleSubmitButton = () => {
 
     console.log("Location Updated: ")
+
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 15000,
+    })
+    .then(location => {
+        console.log(location);
+    })
+    .catch(error => {
+        const { code, message } = error;
+        console.warn(code, message);
+        if (code === 'CANCELLED') {
+          alert('Location cancelled by user or by another request');
+        }
+        if (code === 'UNAVAILABLE') {
+          alert('Location service is disabled or unavailable');
+        }
+        if (code === 'TIMEOUT') {
+          alert('Location request timed out');
+        }
+        if (code === 'UNAUTHORIZED') {
+          alert('Authorization denied');
+        }
+    })
     
     return;
     // if (!userEmail) {
@@ -75,7 +100,7 @@ const Blank = ({navigation}) => {
     >
       <View style={styles.View_3}>
 
-        <TouchableOpacity onPress={() => navigation.goBack()} >
+        <TouchableOpacity onPress={() => navigation.navigate("Interests")} >
           <ImageBackground source={require ('../assets/images/left_arrow.png')} style={styles.back_icon} />
         </TouchableOpacity>
 
@@ -102,7 +127,7 @@ const Blank = ({navigation}) => {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.Text_88_dont_allow} onPress={() => navigation.goBack()} >
+          <Text style={styles.Text_88_dont_allow} onPress={() => navigation.navigate("Interests")} >
             Don't Allow
           </Text>
 

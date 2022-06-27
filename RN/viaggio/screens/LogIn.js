@@ -68,6 +68,11 @@ const Blank = ({navigation}) => {
     })
       .then((response) => response.json())
       .then((responseJson) => {
+        if(!responseJson.user){
+          alert("Invalid Email or Password");
+          setLoadingEffect(false);
+          return;
+        }
         console.log("Response: ", responseJson);
         AsyncStorage.setItem('user_id_vg', responseJson.user.id);
         AsyncStorage.setItem('user_token_vg', responseJson.token);

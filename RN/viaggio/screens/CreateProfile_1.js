@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useEffect, useState} from "react"
 import {
   View,
   ImageBackground,
@@ -8,12 +8,46 @@ import {
   ScrollView
 } from "react-native"
 import {launchImageLibrary} from 'react-native-image-picker';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const Blank = ({navigation}) => {
 
   const [imageUploaded, setImageUploaded] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
-  const [LoadingEffect, setLoadingEffect] = useState(false);
+  const [LoadingEffect, setLoadingEffect] = useState(true);
+  const [userToken, setUserToken] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [userPhoto, setUserPhoto] = useState(null);
+
+  useEffect(() => {
+
+    const getUserTokenFromStorage = async()=>{
+      let user_token = await AsyncStorage.getItem("user_token_vg");
+      let user_id = await AsyncStorage.getItem("user_id_vg");
+      console.log("User token: ", user_token)
+      setUserToken(user_token);
+      console.log("User id: ", user_id)
+      setUserId(user_id);
+      fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${user_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization': `Token ${user_token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          console.log("Response all vehicle: ", responseJson);
+          setUserPhoto(responseJson.profile.photo);
+          })
+        .catch((error) => {
+          console.error(error);
+        });
+      setLoadingEffect(false);
+    }
+    getUserTokenFromStorage()
+
+  }, []);
 
   const createFormData = (photo, body = {}) => {
     const data = new FormData();
@@ -38,36 +72,24 @@ const Blank = ({navigation}) => {
     }
 
     console.log('profile Image URI: ', profileImage.assets[0].uri);
-    console.log('profile Image File Name: ', profileImage.assets[0].fileName);
-    console.log('profile Image File Type: ', profileImage.assets[0].type);
-    console.log('profile Image File Size: ', profileImage.assets[0].fileSize);
-    console.log('profile Image File Width: ', profileImage.assets[0].width);
-    console.log('profile Image File Height: ', profileImage.assets[0].height);
-    let createdFormData = createFormData(profileImage, { userId: '123' })
-    // console.log( JSON.stringify(createdFormData) );
+
+    let formdata = new FormData();
+
+    if (imageUploaded) {
+      formdata.append('profile.photo', {
+        name: profileImage.assets[0].fileName,
+        type: profileImage.assets[0].type,
+        uri: Platform.OS === 'ios' ? photo.uri.replace('file://', '') : profileImage.assets[0].uri,
+      });
+    }
 
     setLoadingEffect(true);
-    
-    var dataToSend = {
-      "profile.photo": profileImage.assets[0].uri,
-      private_mode: false,
-    };
-    
-    var formBody = [];
-    for (var key in dataToSend) {
-      var encodedKey = encodeURIComponent(key);
-      var encodedValue = encodeURIComponent(dataToSend[key]);
-      formBody.push(encodedKey + '=' + encodedValue);
-    }
-    formBody = formBody.join('&');
-    console.log("FormBody: ", formBody);
-    const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
 
-    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/d0101b88-e82d-414f-ac72-adb86042a057/', {
+    fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${userId}/`, {
       method: 'PATCH',
-      body: formBody,
+      body: formdata,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Content-Type': 'multipart/form-data',
         'Authorization': `Token ${userToken}`,
       },
     })
@@ -92,6 +114,7 @@ const Blank = ({navigation}) => {
       if (response) {
         setProfileImage(response);
         setImageUploaded(true);
+        setUserPhoto(response.assets[0].uri);
       }
     });
   }
@@ -118,7 +141,20 @@ const Blank = ({navigation}) => {
           </Text>
 
           <TouchableOpacity style={styles.View_4} onPress={() => handleImageUpload()}>
-            <ImageBackground source={require ('../assets/images/profile_white_icon.png')} style={styles.profile_icon_upload_picture} />
+            {!userPhoto && (
+              <>
+              <ImageBackground source={require ('../assets/images/profile_white_icon.png')} style={styles.profile_icon_upload_picture} />
+              </>
+            )}
+            {userPhoto && (
+              <>
+                <ImageBackground
+                  source={{ uri: userPhoto }}
+                  // style={{ width: 300, height: 300 }}
+                  style={styles.profile_icon_upload_picture_real}
+                />
+              </>
+            )}
           </TouchableOpacity>
 
           <View style={styles.View_5}>
@@ -203,8 +239,7 @@ const styles = StyleSheet.create({
   View_4: {
     width: 235,
     height: 212,
-    // backgroundColor: "rgba(246, 95, 77, 0.1)",
-    backgroundColor: "red",
+    backgroundColor: "rgba(246, 95, 77, 0.1)",
     borderRadius: 15,
     marginBottom: 50,
     alignSelf: "center",
@@ -219,6 +254,17 @@ const styles = StyleSheet.create({
     marginTop: -67,
     marginLeft: -54,
     opacity: .7,
+  },
+  profile_icon_upload_picture_real: {
+    width: 220,
+    height: 200,
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -100,
+    marginLeft: -110,
+    opacity: .7,
+    borderRadius: 15,
   },
   View_5: {
     width: "90%",

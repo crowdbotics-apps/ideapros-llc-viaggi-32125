@@ -8,16 +8,20 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import AsyncStorage from '@react-native-community/async-storage';
+
 const Blank = ({navigation}) => {
 
-  const [LoadingEffect, setLoadingEffect] = useState(false);
+  const [LoadingEffect, setLoadingEffect] = useState(true);
   const [userDob, setUserDob] = useState("");
   const [userGender, setUserGender] = useState("");
   const [userCity, setUserCity] = useState("");
   const [userZip, setUserZip] = useState("");
   const [userState, setUserState] = useState("");
   const [userCountry, setUserCountry] = useState("");
-  const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
+  // const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
+  const [userToken, setUserToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
   const handleSubmitButton = () => {
     
@@ -65,7 +69,7 @@ const Blank = ({navigation}) => {
     formBody = formBody.join('&');
     console.log(formBody);
 
-    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/d0101b88-e82d-414f-ac72-adb86042a057/', {
+    fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${userId}/`, {
       method: 'PATCH',
       body: formBody,
       headers: {
@@ -86,26 +90,37 @@ const Blank = ({navigation}) => {
   };
 
   useEffect(() => {
-    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/eb9b5e84-cadf-4e5d-805f-a238b79a746c/', {
-      method: 'GET',
-      headers: {
-        'Content-Type':'application/json',
-        'Authorization': `Token ${userToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log("Response all vehicle: ", responseJson);
-        setUserDob(responseJson.profile.dob);
-        setUserGender(responseJson.profile.gender);
-        setUserCity(responseJson.profile.city);
-        setUserZip(responseJson.profile.zip_code);
-        setUserState(responseJson.profile.state);
-        setUserCountry(responseJson.profile.country);
-        })
-      .catch((error) => {
-        console.error(error);
-      });
+
+    const storage = async()=>{
+      let user_token = await AsyncStorage.getItem("user_token_vg");
+      let user_id = await AsyncStorage.getItem("user_id_vg");
+      console.log("User token: ", user_token)
+      setUserToken(user_token);
+      console.log("User id: ", user_id)
+      setUserId(user_id);
+      fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${user_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization': `Token ${user_token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          console.log("Response all vehicle: ", responseJson);
+          setUserDob(responseJson.profile.dob);
+          setUserGender(responseJson.profile.gender);
+          setUserCity(responseJson.profile.city);
+          setUserZip(responseJson.profile.zip_code);
+          setUserState(responseJson.profile.state);
+          setUserCountry(responseJson.profile.country);
+          })
+        .catch((error) => {
+          console.error(error);
+        });
+        setLoadingEffect(false);
+    }
+    storage()
 
   }, [])
 
@@ -121,7 +136,10 @@ const Blank = ({navigation}) => {
           <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
         </View>}
 
-        <TouchableOpacity onPress={() => navigation.goBack()} >
+        <TouchableOpacity onPress={() => 
+        // navigation.goBack()
+        navigation.navigate('CreateProfile_2')
+        } >
           <ImageBackground source={require ('../assets/images/left_arrow.png')} style={styles.back_icon} />
         </TouchableOpacity>
 

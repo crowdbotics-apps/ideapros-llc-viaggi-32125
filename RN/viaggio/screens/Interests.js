@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState, useEffect} from "react"
 import {
   View,
   ImageBackground,
@@ -8,55 +8,117 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+import AsyncStorage from '@react-native-community/async-storage';
+
 const Blank = ({navigation}) => {
 
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [userInterests, setUserInterests] = useState([]);
+  const [userToken, setUserToken] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [hotelAddedInterests, setHotelAddedInterests] = useState(false);
+  const [restaurantAddedInterests, setRestaurantAddedInterests] = useState(false);
+  const [barsAddedInterests, setBarsAddedInterests] = useState(false);
+  const [shoppingAddedInterests, setShoppingAddedInterests] = useState(false);
+  const [otherPOIsAddedInterests, setOtherPOIsAddedInterests] = useState(false);
+  const [allPOIsAddedInterests, setAllPOIsAddedInterests] = useState(false);
+  let user_selected_interests = ["Hotels", "Restaurants", "Shopping", "Other POIs"];
+  const [LoadingEffect, setLoadingEffect] = useState(true);
+
+
+  useEffect(() => {
+
+    const storage = async()=>{
+      let user_token = await AsyncStorage.getItem("user_token_vg");
+      let user_id = await AsyncStorage.getItem("user_id_vg");
+      console.log("User token: ", user_token)
+      setUserToken(user_token);
+      console.log("User id: ", user_id)
+      setUserId(user_id);
+      fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${user_id}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization': `Token ${user_token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          // console.log("Response user profile: ", responseJson.profile.interests, typeof(responseJson.profile.interests), responseJson.profile.interests.length );
+          if(responseJson.profile.interests.length > 0){
+            for (let i = 0; i < responseJson.profile.interests.length; i++) {
+              if(responseJson.profile.interests[i] === "Hotels"){
+                setHotelAddedInterests(true);
+              }
+              if(responseJson.profile.interests[i] === "Restaurants"){
+                setRestaurantAddedInterests(true);
+              }
+              if(responseJson.profile.interests[i] === "Bars"){
+                setBarsAddedInterests(true);
+              }
+              if(responseJson.profile.interests[i] === "Shopping"){
+                setShoppingAddedInterests(true);
+              }
+              if(responseJson.profile.interests[i] === "Other POIs"){
+                setOtherPOIsAddedInterests(true);
+              }
+            }
+          }
+          })
+        .catch((error) => {
+          console.error(error);
+        });
+      setLoadingEffect(false);
+    }
+    storage()
+
+
+  }, [])
+
+
 
   const handleSubmitButton = () => {
     
-    if (!userEmail) {
-      alert('Please fill Email');
+    if (!hotelAddedInterests && !restaurantAddedInterests && !barsAddedInterests && !shoppingAddedInterests && !otherPOIsAddedInterests) {
+      alert('No interests selected');
       return;
     }
-    if (!userPassword) {
-      alert('Please fill Password');
-      return;
-    }
-    
-    var dataToSend = {
-      username: userEmail,
-      password: userPassword,
-    };
-    // var newData = {
-    //   username: "test_user",
-    //   password: "test_user_12345"
-    // }
-    var formBody = [];
-    for (var key in dataToSend) {
-      var encodedKey = encodeURIComponent(key);
-      var encodedValue = encodeURIComponent(dataToSend[key]);
-      formBody.push(encodedKey + '=' + encodedValue);
-      // formBody.push(key + '=' + dataToSend[key]);
-    }
-    formBody = formBody.join('&');
-    console.log(formBody);
-    // navigation.replace('MyDrawer');
+    setLoadingEffect(true);
 
-    fetch('https://ideapros-llc-automa-31974.botics.co/api/v1/login/', {
-      method: 'POST',
-      // body: JSON.stringify(newData),
-      body: formBody,
+    let formdata = new FormData();
+
+    if (hotelAddedInterests) {
+      formdata.append("profile.interests", 'Hotels');
+    }
+    if (restaurantAddedInterests) {
+      formdata.append("profile.interests", 'Restaurants');
+    }
+    if (barsAddedInterests) {
+      formdata.append("profile.interests", 'Bars');
+    }
+    if (shoppingAddedInterests) {
+      formdata.append("profile.interests", 'Shopping');
+    }
+    if (otherPOIsAddedInterests) {
+      formdata.append("profile.interests", 'Other POIs');
+    }
+    if (allPOIsAddedInterests) {
+      formdata.append("profile.interests", 'All');
+    }
+
+    fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${userId}/`, {
+      method: 'PATCH',
+      body: formdata,
       headers: {
-        //Header Defination
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        // 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Content-Type': 'multipart/form-data',
+        'Authorization': `Token ${userToken}`,
       },
     })
-      .then((response) => response.json())
+      .then((response) => response.text())
       .then((responseJson) => {
-        // console.log("hello");
         console.log("Response: ", responseJson);
-        navigation.replace('LogIn');
+
+        navigation.replace('Location');
       })
       .catch((error) => {
         console.error(error);
@@ -71,7 +133,14 @@ const Blank = ({navigation}) => {
     >
       <View style={styles.View_3}>
 
-        <TouchableOpacity onPress={() => navigation.goBack()} >
+        {LoadingEffect && <View style={styles.Loading_effect}>
+          <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
+        </View>}
+
+        <TouchableOpacity onPress={() => 
+        // navigation.goBack()
+        navigation.navigate('CreateProfile_3')
+        } >
           <ImageBackground source={require ('../assets/images/left_arrow.png')} style={styles.back_icon} />
         </TouchableOpacity>
 
@@ -87,74 +156,74 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_4_interest_wrapper}>
 
-            <View style={styles.View_4_interest}>
+            <TouchableOpacity style={[styles.View_4_interest, hotelAddedInterests ? styles.View_4_interest_updated : styles.View_4_interest]} onPress={()=>setHotelAddedInterests(!hotelAddedInterests)} >
               <View style={styles.View_4_interest_image_wrapper}>
                 <ImageBackground source={require ('../assets/images/interest_hotel.png')} style={styles.interest_icon} />
               </View>
               <Text style={styles.Text_89}>
                 Hotels
               </Text>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.View_4_interest}>
+            <TouchableOpacity style={[styles.View_4_interest, restaurantAddedInterests ? styles.View_4_interest_updated : styles.View_4_interest]} onPress={()=>setRestaurantAddedInterests(!restaurantAddedInterests)} >
               <View style={styles.View_4_interest_image_wrapper_2}>
                 <ImageBackground source={require ('../assets/images/interest_food.png')} style={styles.interest_icon_2} />
               </View>
               <Text style={styles.Text_89}>
                 Restaurants
               </Text>
-            </View>
+            </TouchableOpacity>
             
           </View>
 
           <View style={styles.View_4_interest_wrapper}>
 
-            <View style={styles.View_4_interest}>
+            <TouchableOpacity style={[styles.View_4_interest, barsAddedInterests ? styles.View_4_interest_updated : styles.View_4_interest]} onPress={()=>setBarsAddedInterests(!barsAddedInterests)} >
               <View style={styles.View_4_interest_image_wrapper_3}>
                 <ImageBackground source={require ('../assets/images/interest_cocktail.png')} style={styles.interest_icon_3} />
               </View>
               <Text style={styles.Text_89}>
-                Hotels
+                Bars
               </Text>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.View_4_interest}>
+            <TouchableOpacity style={[styles.View_4_interest, shoppingAddedInterests ? styles.View_4_interest_updated : styles.View_4_interest]} onPress={()=>setShoppingAddedInterests(!shoppingAddedInterests)} >
               <View style={styles.View_4_interest_image_wrapper_4}>
                 <ImageBackground source={require ('../assets/images/interest_shopping.png')} style={styles.interest_icon_4} />
               </View>
               <Text style={styles.Text_89}>
-                Restaurants
+                Shopping
               </Text>
-            </View>
+            </TouchableOpacity>
             
           </View>
 
           <View style={styles.View_4_interest_wrapper}>
 
-            <View style={styles.View_4_interest}>
+            <TouchableOpacity style={[styles.View_4_interest, otherPOIsAddedInterests ? styles.View_4_interest_updated : styles.View_4_interest]} onPress={()=>setOtherPOIsAddedInterests(!otherPOIsAddedInterests)} >
               <View style={styles.View_4_interest_image_wrapper_5}>
                 <ImageBackground source={require ('../assets/images/interest_other_pois.png')} style={styles.interest_icon_5} />
               </View>
               <Text style={styles.Text_89}>
-                Hotels
+                Other POIs
               </Text>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.View_4_interest}>
+            <TouchableOpacity style={[styles.View_4_interest, allPOIsAddedInterests ? styles.View_4_interest_updated : styles.View_4_interest]} onPress={()=>setAllPOIsAddedInterests(!allPOIsAddedInterests)} >
               <View style={styles.View_4_interest_image_wrapper_6}>
                 <ImageBackground source={require ('../assets/images/interest_all_pois.png')} style={styles.interest_icon_6} />
               </View>
               <Text style={styles.Text_89}>
-                Restaurants
+                All POI’s
               </Text>
-            </View>
+            </TouchableOpacity>
             
           </View>
 
           <View style={styles.View_7}>
             <TouchableOpacity
-              // onPress={() => handleSubmitButton()}
-              onPress={() => navigation.navigate('Location')}
+              onPress={() => handleSubmitButton()}
+              // onPress={() => navigation.navigate('Location')}
             >
               <Text style={styles.Text_90}>
                 Get Started
@@ -171,7 +240,26 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
- 
+  Loading_effect: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, .9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+  },
+  Loading_effect_image: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 70,
+    height: 70,
+    marginTop: -35,
+    marginLeft: -35,
+  },
   ScrollView_1: { 
     backgroundColor: "rgba(255, 255, 255, 1)" 
   },
@@ -240,6 +328,10 @@ const styles = StyleSheet.create({
     elevation: 15,
     marginLeft: 11,
     marginRight: 11,
+  },
+  View_4_interest_updated: {
+    backgroundColor: "lightcoral",
+    shadowColor: "black",
   },
   View_4_interest_image_wrapper: {
     width: 73,
