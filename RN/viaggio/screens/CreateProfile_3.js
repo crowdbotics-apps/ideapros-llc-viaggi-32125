@@ -77,7 +77,7 @@ const Blank = ({navigation}) => {
       .then((responseJson) => {
         console.log("Response: ", responseJson);
         setLoadingEffect(false);
-        navigation.replace('Location');
+        navigation.replace('Interests');
       })
       .catch((error) => {
         console.error(error);

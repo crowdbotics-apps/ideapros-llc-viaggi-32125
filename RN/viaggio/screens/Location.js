@@ -8,23 +8,25 @@ import {
   StyleSheet,
   ScrollView
 } from "react-native"
+
 const Blank = ({navigation}) => {
 
-  const [userEmail, setUserEmail] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  // const [userEmail, setUserEmail] = useState("");
+  // const [userPassword, setUserPassword] = useState("");
 
   const handleSubmitButton = () => {
 
     console.log("Location Updated: ")
     
-    if (!userEmail) {
-      alert('Please fill Email');
-      return;
-    }
-    if (!userPassword) {
-      alert('Please fill Password');
-      return;
-    }
+    return;
+    // if (!userEmail) {
+    //   alert('Please fill Email');
+    //   return;
+    // }
+    // if (!userPassword) {
+    //   alert('Please fill Password');
+    //   return;
+    // }
     
     var dataToSend = {
       username: userEmail,
@@ -100,7 +102,7 @@ const Blank = ({navigation}) => {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.Text_88_dont_allow}>
+          <Text style={styles.Text_88_dont_allow} onPress={() => navigation.goBack()} >
             Don't Allow
           </Text>
 
