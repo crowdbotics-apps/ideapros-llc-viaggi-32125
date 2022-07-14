@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useRef} from "react"
 import {
   View,
   ImageBackground,
@@ -11,6 +11,10 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 
 const Blank = ({navigation}) => {
+
+  const secondTextInput = useRef(null);
+  const thirdTextInput = useRef(null);
+  const fourthTextInput = useRef(null);
 
   const [Otp1, setOtp1] = useState("");
   const [Otp2, setOtp2] = useState("");
@@ -28,11 +32,12 @@ const Blank = ({navigation}) => {
 
   const handleSubmitButton = () => {
     
-    if (!Otp1 && !Otp2 && !Otp3 && !Otp4) {
+    if (!Otp1.trim() || !Otp2.trim() || !Otp3.trim() || !Otp4.trim()) {
       alert('Please fill Token');
       return;
     }
-
+    // console.log("OTP: " + Otp1 + Otp2 + Otp3 + Otp4);
+    // return
     setLoadingEffect(true);
     
     var dataToSend = {
@@ -101,10 +106,10 @@ const Blank = ({navigation}) => {
           </Text>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="5" onChangeText={(Otp1) => setOtp1(Otp1)} />
-            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(Otp2) => setOtp2(Otp2)} />
-            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(Otp3) => setOtp3(Otp3)} />
-            <TextInput style={styles.TextInput_1} placeholder="" onChangeText={(Otp4) => setOtp4(Otp4)} />
+            <TextInput style={styles.TextInput_1} maxLength={1} placeholder="" keyboardType={'numeric'} onChangeText={(Otp1) => { setOtp1(Otp1);secondTextInput.current.focus(); }} blurOnSubmit={false} />
+            <TextInput style={styles.TextInput_1} maxLength={1} placeholder="" keyboardType={'numeric'} ref={secondTextInput} onChangeText={(Otp2) => { setOtp2(Otp2);thirdTextInput.current.focus(); }} blurOnSubmit={false} />
+            <TextInput style={styles.TextInput_1} maxLength={1} placeholder="" keyboardType={'numeric'} ref={thirdTextInput} onChangeText={(Otp3) => { setOtp3(Otp3);fourthTextInput.current.focus(); }} blurOnSubmit={false}   />
+            <TextInput style={styles.TextInput_1} maxLength={1} placeholder="" onChangeText={(Otp4) => setOtp4(Otp4)} keyboardType={'numeric'} ref={fourthTextInput} />
           </View>
 
           <View style={styles.View_7}>

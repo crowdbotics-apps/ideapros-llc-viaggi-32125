@@ -293,13 +293,15 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginTop: -8,
     marginBottom: 50,
+    // backgroundColor: "red",
   },
   Text_88: {
     fontStyle: "normal",
     fontSize: 11,
     lineHeight: 20,
     color: "rgba(79, 84, 84, 0.9)",
-    fontWeight: "400",
+    // color: "white",
+    fontWeight: "900",
     textAlign: "right",
   },
   View_7: {
