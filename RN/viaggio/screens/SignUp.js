@@ -164,7 +164,7 @@ const Blank = ({navigation}) => {
 
           <View style={styles.View_12}>
             <Text style={styles.Text_92}>
-              Don’t have an account? 
+            Already have an account? 
             </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('LogIn')}

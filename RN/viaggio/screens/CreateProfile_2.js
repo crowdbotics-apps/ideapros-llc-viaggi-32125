@@ -170,7 +170,7 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Enter phone number" value={userPhone} onChangeText={(UserPhone) => setUserPhone(UserPhone)} />
+            <TextInput style={styles.TextInput_1} placeholder="Enter phone number" value={userPhone} onChangeText={(UserPhone) => setUserPhone(UserPhone)} keyboardType={'numeric'} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/phone_icon.png')} style={styles.input_phone_icon} />
             </View>
@@ -192,6 +192,7 @@ const Blank = ({navigation}) => {
               numberOfLines={10}
               onChangeText={(UserBio) => setUserBio(UserBio)}
               value={userBio}
+              maxLength={200}
               />
           </View>
 
@@ -336,6 +337,10 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     marginBottom: 15,
+    // backgroundColor: "red",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   Text_88: {
     fontFamily: 'Museo Slab',
@@ -344,7 +349,10 @@ const styles = StyleSheet.create({
     fontSize: 8,
     lineHeight: 14,
     color: "#4F5454",
-    marginRight: 5,
+    // marginRight: 5,
+    // backgroundColor: "green",
+    width: "10%",
+    textAlign: "center",
   },
   Text_89: {
     fontFamily: 'Museo Slab',
@@ -354,6 +362,10 @@ const styles = StyleSheet.create({
     lineHeight: 14,
     color: "#4F5454",
     opacity: 0.6,
+    paddingLeft: 5,
+    // backgroundColor: "blue",
+    overflow: "hidden",
+    width: "90%",
   },
   View_7: {
     width: 283,

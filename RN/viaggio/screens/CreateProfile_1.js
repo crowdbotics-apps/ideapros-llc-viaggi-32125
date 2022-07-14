@@ -37,8 +37,14 @@ const Blank = ({navigation}) => {
       })
         .then((response) => response.json())
         .then((responseJson) => {
-          console.log("Response all vehicle: ", responseJson);
-          setUserPhoto(responseJson.profile.photo);
+          console.log("Response user details: ", responseJson);
+          if (responseJson.profile.photo) {
+            setUserPhoto(responseJson.profile.photo);
+          } else {
+            setUserPhoto(null);
+          }
+          console.log("Response user details: ", responseJson.profile.photo);
+          // setUserPhoto(responseJson.profile.photo);
           })
         .catch((error) => {
           console.error(error);
@@ -111,7 +117,7 @@ const Blank = ({navigation}) => {
   const handleImageUpload = () => {
     launchImageLibrary({ noData: true }, (response) => {
       console.log(response);
-      if (response) {
+      if (response.assets) {
         setProfileImage(response);
         setImageUploaded(true);
         setUserPhoto(response.assets[0].uri);

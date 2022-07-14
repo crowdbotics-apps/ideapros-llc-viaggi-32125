@@ -9,12 +9,28 @@ import {
   ScrollView
 } from "react-native"
 import AsyncStorage from '@react-native-community/async-storage';
+import SelectDropdown from 'react-native-select-dropdown'
+import DatePicker from 'react-native-date-picker'
+
 
 const Blank = ({navigation}) => {
+  const genders = ["Male", "Female"]
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const dateFormatAmPm = (date) => {
+    var year = date.getFullYear();
+    var month = date.getMonth()+1;
+    var day = date.getDate();
+    // var strTime = monthNames[month] + " " + day + "," + year;
+    var strTime = year + "-" + month + "-" + day;
+    return strTime;
+  }
 
   const [LoadingEffect, setLoadingEffect] = useState(true);
   const [userDob, setUserDob] = useState("");
   const [userGender, setUserGender] = useState("");
+  const [userAddress, setUserAddress] = useState("");
   const [userCity, setUserCity] = useState("");
   const [userZip, setUserZip] = useState("");
   const [userState, setUserState] = useState("");
@@ -22,15 +38,24 @@ const Blank = ({navigation}) => {
   // const userToken = "735cd18d6e50adcbc63f2b045702621b9cbe6bc5";
   const [userToken, setUserToken] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [date, setDate] = useState(new Date())
+  const [open, setOpen] = useState(false);
+
 
   const handleSubmitButton = () => {
-    
+    const str_date = dateFormatAmPm(date);
+    console.log("User Dob: ", str_date, userDob);
+    // return;
     if (!userDob) {
       alert('Please add date of birth');
       return;
     }
     if (!userGender) {
       alert('Please add gender');
+      return;
+    }
+    if (!userAddress) {
+      alert("Please add address")
       return;
     }
     if (!userCity) {
@@ -53,8 +78,9 @@ const Blank = ({navigation}) => {
     setLoadingEffect(true);
     
     var dataToSend = {
-      "profile.bob": userDob,
+      "profile.dob": str_date,
       "profile.gender": userGender,
+      "profile.address": userAddress,
       "profile.city": userCity,
       "profile.zip_code": userZip,
       "profile.state": userState,
@@ -68,7 +94,7 @@ const Blank = ({navigation}) => {
     }
     formBody = formBody.join('&');
     console.log(formBody);
-
+    // return;
     fetch(`https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/${userId}/`, {
       method: 'PATCH',
       body: formBody,
@@ -107,9 +133,10 @@ const Blank = ({navigation}) => {
       })
         .then((response) => response.json())
         .then((responseJson) => {
-          console.log("Response all vehicle: ", responseJson);
+          console.log("Response user details: ", responseJson);
           setUserDob(responseJson.profile.dob);
           setUserGender(responseJson.profile.gender);
+          setUserAddress(responseJson.profile.address)
           setUserCity(responseJson.profile.city);
           setUserZip(responseJson.profile.zip_code);
           setUserState(responseJson.profile.state);
@@ -150,16 +177,56 @@ const Blank = ({navigation}) => {
           </Text>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Date Of Birth" value={userDob} onChangeText={(userDob) => setUserDob(userDob)} />
+
+            <DatePicker modal open={open} date={date} mode="date"
+              onConfirm={(date) => {
+                setOpen(false)
+                setDate(date)
+                setUserDob(dateFormatAmPm(date))
+                console.log("date: ", date, "user dob: ", userDob)
+              }}
+              onCancel={() => {
+                setOpen(false)
+              }}
+            />
+
+            <TouchableOpacity title="Open" onPress={() => setOpen(true)} style={styles.t_o_a_d}>
+              <Text style={styles.t_o_a_d_text}>{userDob}</Text>
+            </TouchableOpacity>
+
+            {/* <TextInput style={styles.TextInput_1} placeholder="Date Of Birth" value={userDob} onChangeText={(userDob) => {setOpen(true)}} /> */}
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/calender_icon.png')} style={styles.input_calender_icon} />
             </View>
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Gender" value={userGender}  onChangeText={(UserGender) => setUserGender(UserGender)} />
+            <SelectDropdown
+              data={genders}
+              onSelect={(selectedItem, index) => {
+                console.log(selectedItem, index)
+                setUserGender(selectedItem)
+              }}
+              buttonTextAfterSelection={(selectedItem, index) => {
+                // text represented after item is selected
+                // if data array is an array of objects then return selectedItem.property to render after item is selected
+                return selectedItem
+              }}
+              rowTextForSelection={(item, index) => {
+                // text represented for each item in dropdown
+                // if data array is an array of objects then return item.property to represent item in dropdown
+                return item
+              }}
+              buttonStyle={styles.a_r_s_dropdown}
+              buttonTextStyle={styles.a_r_s_dropdown_text}
+              defaultButtonText={userGender}
+            />
+            {/* <TextInput style={styles.TextInput_1} placeholder="Gender" value={userGender}  onChangeText={(UserGender) => setUserGender(UserGender)} /> */}
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/login_user_icon.png')} style={styles.input_user_icon} />
+            </View>
+            <View style={styles.input_dropdown_gender_view}>
+              <ImageBackground source={require ('../assets/images/down_arrow.png')} style={styles.input_gender_dropdown_icon} />
             </View>
           </View>
 
@@ -171,6 +238,13 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_4}>
+            <TextInput style={styles.TextInput_1} placeholder="Address" value={userAddress} onChangeText={(UserAddress) => setUserAddress(UserAddress)} />
+            <View style={styles.input_icon_view}>
+              <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
+            </View>
+          </View>
+
+          <View style={styles.View_4}>
             <TextInput style={styles.TextInput_1} placeholder="City" value={userCity} onChangeText={(UserCity) => setUserCity(UserCity)} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
@@ -178,7 +252,7 @@ const Blank = ({navigation}) => {
           </View>
 
           <View style={styles.View_4}>
-            <TextInput style={styles.TextInput_1} placeholder="Zipcode" value={userZip} onChangeText={(UserZip) => setUserZip(UserZip)} />
+            <TextInput style={styles.TextInput_1} placeholder="Zipcode" value={userZip} onChangeText={(UserZip) => setUserZip(UserZip)} keyboardType={'numeric'} />
             <View style={styles.input_icon_view}>
               <ImageBackground source={require ('../assets/images/location_small_icon.png')} style={styles.input_location_icon} />
             </View>
@@ -218,6 +292,37 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
+  t_o_a_d_text: {
+    color: "black",
+    fontSize: 13,
+    backgroundColor: "white",
+  },
+  t_o_a_d: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingTop: 15,
+    paddingLeft: 60,
+  },
+  a_r_s_dropdown: {
+    color: "rgba(15, 4, 22, 0.5)",
+    width: "100%",
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 8,
+    // borderColor: "rgba(15, 31, 72, 0.1)",
+    // borderWidth: 1,
+    paddingTop: 0,
+    paddingLeft: 18.50,
+  },
+  a_r_s_dropdown_text: {
+    // color: "rgba(15, 4, 22, 0.5)",
+    fontSize: 14,
+    marginLeft: -170,
+    // textAlign: "left",
+    // paddingLeft: 60,
+  },
   Loading_effect: {
     position: "absolute",
     top: 0,
@@ -289,6 +394,20 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 13,
     left: 10,
+  },
+  input_dropdown_gender_view: {
+    width: 22,
+    height: 22,
+    position: "absolute",
+    top: 13,
+    right: 10,
+  },
+  input_gender_dropdown_icon: {
+    width: 9,
+    height: 6,
+    position: "relative",
+    top: 9,
+    left: 5,
   },
   input_calender_icon: {
     width: 16,
