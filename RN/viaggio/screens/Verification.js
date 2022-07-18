@@ -23,6 +23,7 @@ const Blank = ({navigation}) => {
   const [userEmail, setUserEmail] = useState("");
   const [LoadingEffect, setLoadingEffect] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [otpSendSuccess, setOtpSendSuccess] = useState(false);
 
   useEffect(() => {
       AsyncStorage.getItem('user_email_for_token').then((value) =>
@@ -77,6 +78,45 @@ const Blank = ({navigation}) => {
     
   };
 
+  const handleResendOtp = () => {
+    setLoadingEffect(true);
+
+    var dataToSend = {
+      email: userEmail
+    };
+    var formBody = [];
+    for (var key in dataToSend) {
+      var encodedKey = encodeURIComponent(key);
+      var encodedValue = encodeURIComponent(dataToSend[key]);
+      formBody.push(encodedKey + '=' + encodedValue);
+    }
+    formBody = formBody.join('&');
+    console.log(formBody);
+
+    fetch('https://ideapros-llc-viaggi-32125.botics.co/api/v1/users/otp/', {
+      method: 'POST',
+      body: formBody,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+    })
+      .then((response) => response.status)
+      .then((responseJson) => {
+        console.log("Response: ", responseJson);
+        setLoadingEffect(false);
+        setOtpSendSuccess(true);
+        if (responseJson === 200) {
+          setTimeout(() => {
+            setOtpSendSuccess(false);
+            navigation.replace('Verification');
+          }, 1000);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
   return (
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
@@ -88,9 +128,15 @@ const Blank = ({navigation}) => {
           <ImageBackground source={require("../assets/images/loading.gif")} style={styles.Loading_effect_image} />
         </View>}
 
+        {otpSendSuccess && <View style={styles.Loading_effect}>
+          <Text style={styles.Loading_effect_text_resend}>
+            OTP sent again!
+          </Text>
+        </View>}
+
         {otpVerified && <View style={styles.Loading_effect}>
           <Text style={styles.Loading_effect_text}>
-            OPT verification successful. Redirecting to reset password screen ...
+            OTP verification successful. Redirecting to reset password screen ...
           </Text>
         </View>}
 
@@ -122,6 +168,12 @@ const Blank = ({navigation}) => {
             </TouchableOpacity>
           </View>
 
+          <TouchableOpacity onPress={() => handleResendOtp()}>
+            <Text style={styles.Text_Token_resend}>
+              Resend
+            </Text>
+          </TouchableOpacity>
+
         </View>
 
       </View>
@@ -131,6 +183,17 @@ const Blank = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
+  Text_Token_resend: {
+    width: "100%",
+    height: 60,
+    textAlign: "center",
+    textAlignVertical: "center",
+    fontFamily: "Museo Slab",
+    fontWeight: "normal",
+    fontSize: 11,
+    lineHeight: 20,
+    color: "#4F5454",
+  },
   Touchable_full_cover: {
     width: "100%",
     height: "100%",
@@ -164,6 +227,24 @@ const styles = StyleSheet.create({
     marginTop: -40,
     marginLeft: -150,
     lineHeight: 35,
+  },
+  Loading_effect_text_resend: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#3dc0b9",
+    backgroundColor: "rgba(61, 192, 185, .2)",
+    padding: 20,
+    borderRadius: 10,
+    textAlign: "center",
+    position: "absolute",
+    justifyContent: "center",
+    top: "50%",
+    left: "50%",
+    width: 300,
+    height: 60,
+    marginTop: -40,
+    marginLeft: -150,
+    lineHeight: 20,
   },
   Loading_effect_image: {
     position: "absolute",

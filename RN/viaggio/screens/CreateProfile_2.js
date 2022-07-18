@@ -40,10 +40,10 @@ const Blank = ({navigation}) => {
       alert('Please fill phone number');
       return;
     }
-    if (!userBio) {
-      alert('Please fill bio');
-      return;
-    }
+    // if (!userBio) {
+    //   alert('Please fill bio');
+    //   return;
+    // }
     setLoadingEffect(true);
     
     var dataToSend = {

@@ -72,12 +72,19 @@ const Blank = ({navigation}) => {
   };
 
   const handleSubmitButton = () => {
+
+    // if (userPhoto) {
+    //   console.log("User photo: ", userPhoto);
+    //   navigation.replace("CreateProfile_2");
+    // }
+
     if (!imageUploaded) {
-      alert('Please upload image');
-      return;
+      // alert('Please upload image');
+      // return;
+      navigation.replace("CreateProfile_2");
     }
 
-    console.log('profile Image URI: ', profileImage.assets[0].uri);
+    // console.log('profile Image URI: ', profileImage.assets[0].uri);
 
     let formdata = new FormData();
 
